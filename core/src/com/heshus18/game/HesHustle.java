@@ -12,11 +12,11 @@ import com.badlogic.gdx.Input;
 public class HesHustle extends ApplicationAdapter {
 	SpriteBatch batch;
 	Texture character;
-	Texture checkerboard;
+	Texture playableMap;
 	OrthographicCamera camera;
 	Rectangle player;
+	float mapWidth, mapHeight;
 
-//test change :)
 	@Override
 	public void create () {
 		//creating camera and sprite batch
@@ -26,7 +26,10 @@ public class HesHustle extends ApplicationAdapter {
 
 		//rendering character and background model
 		character = new Texture(Gdx.files.internal("Octodecimals.png"));
-		checkerboard = new Texture(Gdx.files.internal("checkerboard.png"));
+		playableMap = new Texture(Gdx.files.internal("checkerboard.png"));
+
+		mapWidth = playableMap.getWidth();
+		mapHeight = playableMap.getHeight();
 
 		//creating player rectangle
 		player = new Rectangle();
@@ -41,30 +44,47 @@ public class HesHustle extends ApplicationAdapter {
 	public void render () {
 		//move camera to player position
 		camera.position.x = player.getX() + player.getWidth()/2;
-		camera.position.y = player.getY() +player.getHeight()/2;
+		camera.position.y = player.getY() + player.getHeight()/2;
 		camera.update();
 
 		//draw map and character image over player
 		ScreenUtils.clear(0.7f, 0.7f, 1, 0);
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
-		batch.draw(checkerboard, -(checkerboard.getWidth()/2), -(checkerboard.getHeight()/2));
+		batch.draw(playableMap, -(playableMap.getWidth()/2), -(playableMap.getHeight()/2));
 		batch.draw(character, player.x, player.y);
 		batch.end();
 
+		float deltaX = 200 * Gdx.graphics.getDeltaTime();
+		float deltaY = 200 * Gdx.graphics.getDeltaTime();
+
+		// Setting the map boundaries position
+		float minX = -(mapWidth / 2); // Left edge of the map
+		float maxX = (mapWidth / 2) - player.width; // Right edge of the map
+		float minY = -(mapHeight / 2); // Bottom edge of the map
+		float maxY = (mapHeight / 2) - player.height; // Top edge of the map
+
 		//performing character movement
-		if(Gdx.input.isKeyPressed(Input.Keys.A)) player.x -= 200 * Gdx.graphics.getDeltaTime();
-		if(Gdx.input.isKeyPressed(Input.Keys.D)) player.x += 200 * Gdx.graphics.getDeltaTime();
-		if(Gdx.input.isKeyPressed(Input.Keys.W)) player.y += 200 * Gdx.graphics.getDeltaTime();
-		if(Gdx.input.isKeyPressed(Input.Keys.S)) player.y -= 200 * Gdx.graphics.getDeltaTime();
+		if (Gdx.input.isKeyPressed(Input.Keys.A)) player.x = Math.max(player.x - deltaX, minX);
+		if (Gdx.input.isKeyPressed(Input.Keys.D)) player.x = Math.min(player.x + deltaX, maxX);
+		if (Gdx.input.isKeyPressed(Input.Keys.W)) player.y = Math.min(player.y + deltaY, maxY);
+		if (Gdx.input.isKeyPressed(Input.Keys.S)) player.y = Math.max(player.y - deltaY, minY);
 
 	}
-	
+
+	@Override
+	public void resize(int width, int height) {
+		// Expands the camera when the game window screen is changed instead of forcing a fixed size
+		camera.viewportWidth = width;
+		camera.viewportHeight = height;
+		camera.update();
+	}
+
 	@Override
 	public void dispose () {
 		batch.dispose();
 		character.dispose();
-		checkerboard.dispose();
+		playableMap.dispose();
 	}
 
 }
