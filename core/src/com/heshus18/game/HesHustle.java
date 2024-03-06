@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.Input;
@@ -19,6 +20,8 @@ public class HesHustle extends ApplicationAdapter {
 	Rectangle player;
 	float mapWidth, mapHeight;
 	Array<Building> buildings;
+	EnergyBar energyBar;
+	OrthographicCamera hudCamera;
 
 
 	@Override
@@ -37,6 +40,14 @@ public class HesHustle extends ApplicationAdapter {
 		Texture buildingTexture1 = new Texture(Gdx.files.internal("building.png"));
 		Texture buildingTexture2 = new Texture(Gdx.files.internal("building2.png"));
 		Texture buildingTexture3 = new Texture(Gdx.files.internal("building3.png"));
+
+		//creating a camera for the HUDs
+		hudCamera = new OrthographicCamera();
+		hudCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		hudCamera.update();
+
+		energyBar = new EnergyBar(100f, 250f, 35f, new Vector2(20f, Gdx.graphics.getHeight() - 45f),
+				"energyBarBackground.png", "energyBarForeground.png");
 
 		mapWidth = playableMap.getWidth();
 		mapHeight = playableMap.getHeight();
@@ -65,6 +76,7 @@ public class HesHustle extends ApplicationAdapter {
 		//draw map and character image over player
 		ScreenUtils.clear(0.7f, 0.7f, 1, 0);
 		batch.setProjectionMatrix(camera.combined);
+
 		batch.begin();
 		batch.draw(playableMap, -(playableMap.getWidth()/2), -(playableMap.getHeight()/2));
 		batch.draw(character, player.x, player.y);
@@ -73,6 +85,13 @@ public class HesHustle extends ApplicationAdapter {
 		for(Building building : buildings) {
 			batch.draw(building.texture, building.bounds.x, building.bounds.y, building.bounds.width, building.bounds.height);
 		}
+		batch.end();
+
+		//Camera for the HUDs
+		hudCamera.update();
+		batch.setProjectionMatrix(hudCamera.combined);
+		batch.begin();
+		energyBar.render(batch);
 		batch.end();
 
 		// This is so W/S and D/A key still works when the other are colliding with objects
@@ -92,6 +111,14 @@ public class HesHustle extends ApplicationAdapter {
 		if (Gdx.input.isKeyPressed(Input.Keys.D)) potentialX += deltaX;
 		if (Gdx.input.isKeyPressed(Input.Keys.W)) potentialY += deltaY;
 		if (Gdx.input.isKeyPressed(Input.Keys.S)) potentialY -= deltaY;
+
+		//Remove later, this is to test add/drain energy
+		if(Gdx.input.isKeyJustPressed(Input.Keys.K)) {
+			energyBar.drainEnergy(10f);
+		}
+		if(Gdx.input.isKeyJustPressed(Input.Keys.L)) {
+			energyBar.addEnergy(10f);
+		}
 
 		potentialX = Math.max(Math.min(potentialX, maxX), minX);
 		potentialY = Math.max(Math.min(potentialY, maxY), minY);
@@ -135,6 +162,7 @@ public class HesHustle extends ApplicationAdapter {
 		batch.dispose();
 		character.dispose();
 		playableMap.dispose();
+		energyBar.dispose();
 	}
 
 }
