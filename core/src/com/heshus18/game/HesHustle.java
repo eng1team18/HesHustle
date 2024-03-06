@@ -9,7 +9,6 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.Input;
 
-
 public class HesHustle extends ApplicationAdapter {
 	SpriteBatch batch;
 	Texture character;
@@ -17,7 +16,7 @@ public class HesHustle extends ApplicationAdapter {
 	OrthographicCamera camera;
 	Rectangle player;
 
-
+//test change :)
 	@Override
 	public void create () {
 		//creating camera and sprite batch
