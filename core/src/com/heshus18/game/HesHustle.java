@@ -8,25 +8,35 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.utils.Array;
 
 public class HesHustle extends ApplicationAdapter {
 	SpriteBatch batch;
 	Texture character;
 	Texture playableMap;
+	Texture buildingTexture;
 	OrthographicCamera camera;
 	Rectangle player;
 	float mapWidth, mapHeight;
+	Array<Building> buildings;
+
 
 	@Override
 	public void create () {
 		//creating camera and sprite batch
 		batch = new SpriteBatch();
+		buildings = new Array<Building>();
 		camera = new OrthographicCamera();
 		camera.setToOrtho(false, 800, 480);
 
 		//rendering character and background model
 		character = new Texture(Gdx.files.internal("Octodecimals.png"));
 		playableMap = new Texture(Gdx.files.internal("checkerboard.png"));
+
+		// Building textures
+		Texture buildingTexture1 = new Texture(Gdx.files.internal("building.png"));
+		Texture buildingTexture2 = new Texture(Gdx.files.internal("building2.png"));
+		Texture buildingTexture3 = new Texture(Gdx.files.internal("building3.png"));
 
 		mapWidth = playableMap.getWidth();
 		mapHeight = playableMap.getHeight();
@@ -38,6 +48,11 @@ public class HesHustle extends ApplicationAdapter {
 		player.width = 64;
 		player.height = 64;
 
+		// Adding building to the map
+		// Add more building by just copy-pasting these and assigning the texture
+		buildings.add(new Building(100, 100, 120, 80, buildingTexture1));
+		buildings.add(new Building(30, -150, 150, 80, buildingTexture2));
+		buildings.add(new Building(330, 150, 150, 80, buildingTexture3));
 	}
 
 	@Override
@@ -53,10 +68,18 @@ public class HesHustle extends ApplicationAdapter {
 		batch.begin();
 		batch.draw(playableMap, -(playableMap.getWidth()/2), -(playableMap.getHeight()/2));
 		batch.draw(character, player.x, player.y);
+
+		// Drawing the buildings
+		for(Building building : buildings) {
+			batch.draw(building.texture, building.bounds.x, building.bounds.y, building.bounds.width, building.bounds.height);
+		}
 		batch.end();
 
+		// This is so W/S and D/A key still works when the other are colliding with objects
 		float deltaX = 200 * Gdx.graphics.getDeltaTime();
 		float deltaY = 200 * Gdx.graphics.getDeltaTime();
+		float potentialX = player.x + (Gdx.input.isKeyPressed(Input.Keys.D) ? deltaX : 0) - (Gdx.input.isKeyPressed(Input.Keys.A) ? deltaX : 0);
+		float potentialY = player.y + (Gdx.input.isKeyPressed(Input.Keys.W) ? deltaY : 0) - (Gdx.input.isKeyPressed(Input.Keys.S) ? deltaY : 0);
 
 		// Setting the map boundaries position
 		float minX = -(mapWidth / 2); // Left edge of the map
@@ -65,10 +88,37 @@ public class HesHustle extends ApplicationAdapter {
 		float maxY = (mapHeight / 2) - player.height; // Top edge of the map
 
 		//performing character movement
-		if (Gdx.input.isKeyPressed(Input.Keys.A)) player.x = Math.max(player.x - deltaX, minX);
-		if (Gdx.input.isKeyPressed(Input.Keys.D)) player.x = Math.min(player.x + deltaX, maxX);
-		if (Gdx.input.isKeyPressed(Input.Keys.W)) player.y = Math.min(player.y + deltaY, maxY);
-		if (Gdx.input.isKeyPressed(Input.Keys.S)) player.y = Math.max(player.y - deltaY, minY);
+		if (Gdx.input.isKeyPressed(Input.Keys.A)) potentialX -= deltaX;
+		if (Gdx.input.isKeyPressed(Input.Keys.D)) potentialX += deltaX;
+		if (Gdx.input.isKeyPressed(Input.Keys.W)) potentialY += deltaY;
+		if (Gdx.input.isKeyPressed(Input.Keys.S)) potentialY -= deltaY;
+
+		potentialX = Math.max(Math.min(potentialX, maxX), minX);
+		potentialY = Math.max(Math.min(potentialY, maxY), minY);
+
+		Rectangle potentialPlayerX = new Rectangle(potentialX, player.y, player.width, player.height);
+		Rectangle potentialPlayerY = new Rectangle(player.x, potentialY, player.width, player.height);
+
+		// This is the building collision checks, check for either X, Y or both axis are colliding
+		boolean collisionX = false, collisionY = false;
+		for (Building building : buildings) {
+			if (potentialPlayerX.overlaps(building.bounds)) {
+				collisionX = true;
+			}
+			if (potentialPlayerY.overlaps(building.bounds)) {
+				collisionY = true;
+			}
+			if (collisionX && collisionY) break;
+		}
+
+		// Allow character to move if no collision
+		if (!collisionX) {
+			player.x = Math.max(Math.min(potentialX, maxX), minX);
+		}
+
+		if (!collisionY) {
+			player.y = Math.max(Math.min(potentialY, maxY), minY);
+		}
 
 	}
 
