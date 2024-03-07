@@ -13,7 +13,6 @@ import com.badlogic.gdx.utils.ScreenUtils;
 
 public class GameScreen implements Screen {
     final HesHustle game;
-
     SpriteBatch batch;
     Texture character;
     Texture playableMap;
@@ -23,6 +22,8 @@ public class GameScreen implements Screen {
     float mapWidth, mapHeight;
     EnergyBar energyBar;
     OrthographicCamera hudCamera;
+    private Time gameTime;
+    private Clock clockHUD;
 
     public GameScreen(final HesHustle game) {
         this.game = game;
@@ -50,6 +51,9 @@ public class GameScreen implements Screen {
 
         energyBar = new EnergyBar(100f, 250f, 35f, new Vector2(20f, Gdx.graphics.getHeight() - 45f),
                 "energyBarBackground.png", "energyBarForeground.png");
+
+        gameTime = new Time();
+        clockHUD = new Clock(new Vector2(700, 450), gameTime);
 
         mapWidth = playableMap.getWidth();
         mapHeight = playableMap.getHeight();
@@ -94,6 +98,7 @@ public class GameScreen implements Screen {
         batch.setProjectionMatrix(hudCamera.combined);
         batch.begin();
         energyBar.render(batch);
+        clockHUD.render(batch);
         batch.end();
 
         // This is so W/S and D/A key still works when the other are colliding with objects
@@ -120,6 +125,12 @@ public class GameScreen implements Screen {
         }
         if(Gdx.input.isKeyJustPressed(Input.Keys.L)) {
             energyBar.addEnergy(10f);
+        }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.I)) {
+            gameTime.nextDay();;
+        }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.O)) {
+            gameTime.addTime(60);;
         }
 
         potentialX = Math.max(Math.min(potentialX, maxX), minX);
@@ -164,6 +175,7 @@ public class GameScreen implements Screen {
         character.dispose();
         playableMap.dispose();
         energyBar.dispose();
+        clockHUD.dispose();
     }
 
     @Override
