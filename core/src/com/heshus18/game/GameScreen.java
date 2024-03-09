@@ -24,6 +24,8 @@ public class GameScreen implements Screen {
     OrthographicCamera hudCamera;
     private Time gameTime;
     private Clock clockHUD;
+    PopUpManager popUpManager;
+    Score score = Score.getInstance();
 
     public GameScreen(final HesHustle game) {
         this.game = game;
@@ -53,7 +55,7 @@ public class GameScreen implements Screen {
                 "energyBarBackground.png", "energyBarForeground.png");
 
         gameTime = new Time();
-        clockHUD = new Clock(new Vector2(700, 450), gameTime);
+        clockHUD = new Clock(new Vector2(Gdx.graphics.getWidth() - 100, Gdx.graphics.getHeight() - 20f), gameTime);
 
         mapWidth = playableMap.getWidth();
         mapHeight = playableMap.getHeight();
@@ -70,6 +72,75 @@ public class GameScreen implements Screen {
         buildings.add(new Building(100, 100, 120, 80, buildingTexture1));
         buildings.add(new Building(30, -150, 150, 80, buildingTexture2));
         buildings.add(new Building(330, 150, 150, 80, buildingTexture3));
+
+        popUpManager = new PopUpManager();
+
+        PopUp studyPopUp = new PopUp("studyPopUp", "Are you sure you want to start studying?\n\nEnergy drain: 20%\nDuration: 2 Hours", 200, 170, 400, 170, hudCamera, "prompt");
+        studyPopUp.addConfirmAction(() -> {
+            if (!energyBar.drainEnergy(20f)) {
+                popUpManager.showPopUp("noEnergyPopUp");
+            }
+            else {
+                gameTime.addTime(120);
+                score.incrementTimeStudy();
+            }
+        });
+        popUpManager.addPopUp(studyPopUp);
+
+        PopUp eatingPopUp = new PopUp("eatingPopUp", "Are you sure you want to start eating?\n\nEnergy drain: 10%\nDuration: 1 Hour", 200, 170, 400, 170, hudCamera, "prompt");
+        eatingPopUp.addConfirmAction(() -> {
+            if (!energyBar.drainEnergy(10f)) {
+                popUpManager.showPopUp("noEnergyPopUp");
+            }
+            else {
+                gameTime.addTime(60);
+                score.incrementTimeAte();
+            }
+        });
+        popUpManager.addPopUp(eatingPopUp);
+
+        PopUp activityPopUp = new PopUp("activityPopUp", "Are you sure you want to start this activity?\n\nEnergy drain: 15%\nDuration: 2 Hours", 200, 170, 400, 170, hudCamera, "prompt");
+        activityPopUp.addConfirmAction(() -> {
+            if (!energyBar.drainEnergy(15f)) {
+                popUpManager.showPopUp("noEnergyPopUp");
+            }
+            else {
+                gameTime.addTime(120);
+                score.incrementTimeActivity();
+            }
+        });
+        popUpManager.addPopUp(activityPopUp);
+
+        PopUp sleepingPopUp = new PopUp("sleepingPopUp", "Are you sure you want to go to bed?\n\nYou will advance to the next day.", 200, 170, 400, 170, hudCamera, "prompt");
+        sleepingPopUp.addConfirmAction(() -> {
+            int currentHour = gameTime.getHour();
+            int currentDay = gameTime.getDay();
+
+            if (currentHour < 18) {
+                popUpManager.showPopUp("cantSleepPopUp");
+            } else {
+                if (currentDay == 7) {
+                    score.incrementTimeSlept();
+                    game.setScreen(new GameOverScreen(game));
+                } else {
+                    gameTime.nextDay();
+                    score.incrementTimeSlept();
+                    if (currentHour >= 18 && currentHour <= 22) {
+                        energyBar.addEnergy(100f);
+                    } else {
+                        energyBar.addEnergy(50f);
+                    }
+                }
+            }
+        });
+        popUpManager.addPopUp(sleepingPopUp);
+
+
+        PopUp noEnergyPopUp = new PopUp("noEnergyPopUp", "Uh oh! You don't have enough energy!\n\nTime to head to bed.", 200, 170, 400, 170, hudCamera, "warning");
+        popUpManager.addPopUp(noEnergyPopUp);
+
+        PopUp cantSleepPopUp = new PopUp("cantSleepPopUp", "It is too early to go to bed!\n\nCome back later.", 200, 170, 400, 170, hudCamera, "warning");
+        popUpManager.addPopUp(cantSleepPopUp);
     }
 
     @Override
@@ -80,7 +151,7 @@ public class GameScreen implements Screen {
         camera.update();
 
         //draw map and character image over player
-        ScreenUtils.clear(0.7f, 0.7f, 1, 0);
+        ScreenUtils.clear(0.3765f, 0.4588f, 0.5882f, 1);
         batch.setProjectionMatrix(camera.combined);
 
         batch.begin();
@@ -99,65 +170,77 @@ public class GameScreen implements Screen {
         batch.begin();
         energyBar.render(batch);
         clockHUD.render(batch);
+        popUpManager.update();
+        popUpManager.render(batch);
         batch.end();
 
         // This is so W/S and D/A key still works when the other are colliding with objects
         float deltaX = 200 * Gdx.graphics.getDeltaTime();
         float deltaY = 200 * Gdx.graphics.getDeltaTime();
-        float potentialX = player.x + (Gdx.input.isKeyPressed(Input.Keys.D) ? deltaX : 0) - (Gdx.input.isKeyPressed(Input.Keys.A) ? deltaX : 0);
-        float potentialY = player.y + (Gdx.input.isKeyPressed(Input.Keys.W) ? deltaY : 0) - (Gdx.input.isKeyPressed(Input.Keys.S) ? deltaY : 0);
+        if (!popUpManager.isAnyPopUpVisible()) {
+            float potentialX = player.x + (Gdx.input.isKeyPressed(Input.Keys.D) ? deltaX : 0) - (Gdx.input.isKeyPressed(Input.Keys.A) ? deltaX : 0);
+            float potentialY = player.y + (Gdx.input.isKeyPressed(Input.Keys.W) ? deltaY : 0) - (Gdx.input.isKeyPressed(Input.Keys.S) ? deltaY : 0);
 
-        // Setting the map boundaries position
-        float minX = -(mapWidth / 2); // Left edge of the map
-        float maxX = (mapWidth / 2) - player.width; // Right edge of the map
-        float minY = -(mapHeight / 2); // Bottom edge of the map
-        float maxY = (mapHeight / 2) - player.height; // Top edge of the map
+            // Setting the map boundaries position
+            float minX = -(mapWidth / 2); // Left edge of the map
+            float maxX = (mapWidth / 2) - player.width; // Right edge of the map
+            float minY = -(mapHeight / 2); // Bottom edge of the map
+            float maxY = (mapHeight / 2) - player.height; // Top edge of the map
 
-        //performing character movement
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) potentialX -= deltaX;
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) potentialX += deltaX;
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) potentialY += deltaY;
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) potentialY -= deltaY;
+            //performing character movement
+            if (Gdx.input.isKeyPressed(Input.Keys.A)) potentialX -= deltaX;
+            if (Gdx.input.isKeyPressed(Input.Keys.D)) potentialX += deltaX;
+            if (Gdx.input.isKeyPressed(Input.Keys.W)) potentialY += deltaY;
+            if (Gdx.input.isKeyPressed(Input.Keys.S)) potentialY -= deltaY;
 
-        //Remove later, this is to test add/drain energy
-        if(Gdx.input.isKeyJustPressed(Input.Keys.K)) {
-            energyBar.drainEnergy(10f);
-        }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.L)) {
-            energyBar.addEnergy(10f);
-        }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.I)) {
-            gameTime.nextDay();;
-        }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.O)) {
-            gameTime.addTime(60);;
-        }
-
-        potentialX = Math.max(Math.min(potentialX, maxX), minX);
-        potentialY = Math.max(Math.min(potentialY, maxY), minY);
-
-        Rectangle potentialPlayerX = new Rectangle(potentialX, player.y, player.width, player.height);
-        Rectangle potentialPlayerY = new Rectangle(player.x, potentialY, player.width, player.height);
-
-        // This is the building collision checks, check for either X, Y or both axis are colliding
-        boolean collisionX = false, collisionY = false;
-        for (Building building : buildings) {
-            if (potentialPlayerX.overlaps(building.bounds)) {
-                collisionX = true;
+            //Remove later, keybindings for testing only
+            if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
+                gameTime.nextDay();
             }
-            if (potentialPlayerY.overlaps(building.bounds)) {
-                collisionY = true;
+            if (Gdx.input.isKeyJustPressed(Input.Keys.F)) {
+                popUpManager.showPopUp("studyPopUp");
             }
-            if (collisionX && collisionY) break;
+            if (Gdx.input.isKeyJustPressed(Input.Keys.G)) {
+                popUpManager.showPopUp("eatingPopUp");
+            }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
+                popUpManager.showPopUp("activityPopUp");
+            }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.J)) {
+                popUpManager.showPopUp("sleepingPopUp");
+            }
+
+            potentialX = Math.max(Math.min(potentialX, maxX), minX);
+            potentialY = Math.max(Math.min(potentialY, maxY), minY);
+
+            Rectangle potentialPlayerX = new Rectangle(potentialX, player.y, player.width, player.height);
+            Rectangle potentialPlayerY = new Rectangle(player.x, potentialY, player.width, player.height);
+
+
+            // This is the building collision checks, check for either X, Y or both axis are colliding
+            boolean collisionX = false, collisionY = false;
+            for (Building building : buildings) {
+                if (potentialPlayerX.overlaps(building.bounds)) {
+                    collisionX = true;
+                }
+                if (potentialPlayerY.overlaps(building.bounds)) {
+                    collisionY = true;
+                }
+                if (collisionX && collisionY) break;
+            }
+
+            // Allow character to move if no collision
+            if (!collisionX) {
+                player.x = Math.max(Math.min(potentialX, maxX), minX);
+            }
+
+            if (!collisionY) {
+                player.y = Math.max(Math.min(potentialY, maxY), minY);
+            }
         }
 
-        // Allow character to move if no collision
-        if (!collisionX) {
-            player.x = Math.max(Math.min(potentialX, maxX), minX);
-        }
-
-        if (!collisionY) {
-            player.y = Math.max(Math.min(potentialY, maxY), minY);
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            popUpManager.declineVisiblePopUp();
         }
     }
 
@@ -176,6 +259,7 @@ public class GameScreen implements Screen {
         playableMap.dispose();
         energyBar.dispose();
         clockHUD.dispose();
+        popUpManager.dispose();
     }
 
     @Override
