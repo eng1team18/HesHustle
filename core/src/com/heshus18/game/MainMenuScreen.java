@@ -22,6 +22,8 @@ public class MainMenuScreen implements Screen {
     private Rectangle startGameButtonBounds;
     private Texture exitButtonTexture;
     private Rectangle exitButtonBounds;
+    private Texture creditButtonTexture;
+    private Rectangle creditButtonBounds;
 
     /**
      * Constructs the main menu screen with references to the game instance, and initializes UI components.
@@ -36,17 +38,20 @@ public class MainMenuScreen implements Screen {
 
         startGameButtonTexture = new Texture(Gdx.files.internal("startButton.png"));
         exitButtonTexture = new Texture(Gdx.files.internal("exitButton.png"));
+        creditButtonTexture = new Texture(Gdx.files.internal("creditsButton.png"));
 
         float buttonWidth = 300;
         float buttonHeight = 50;
         float padding = 10;
         float posX = (800 - buttonWidth) / 2;
         float startYPos = (480 / 2) + buttonHeight + padding; // Start Game button position
-        float exitYPos = (480 / 2) - (buttonHeight / 2); // Exit button position
+        float creditYPos = (480 / 2) - (buttonHeight / 2); // Credits button position
+        float exitYPos = (480 / 2) - buttonHeight - padding - buttonHeight; // Exit button position
 
         // Button bounding box
         startGameButtonBounds = new Rectangle(posX, startYPos, buttonWidth, buttonHeight);
         exitButtonBounds = new Rectangle(posX, exitYPos, buttonWidth, buttonHeight);
+        creditButtonBounds = new Rectangle(posX, creditYPos, buttonWidth, buttonHeight);
     }
 
     @Override
@@ -61,6 +66,7 @@ public class MainMenuScreen implements Screen {
 
         batch.begin();
         batch.draw(startGameButtonTexture, startGameButtonBounds.x, startGameButtonBounds.y, startGameButtonBounds.width, startGameButtonBounds.height);
+        batch.draw(creditButtonTexture, creditButtonBounds.x, creditButtonBounds.y, creditButtonBounds.width, creditButtonBounds.height);
         batch.draw(exitButtonTexture, exitButtonBounds.x, exitButtonBounds.y, exitButtonBounds.width, exitButtonBounds.height);
         batch.end();
 
@@ -71,6 +77,8 @@ public class MainMenuScreen implements Screen {
             if (startGameButtonBounds.contains(touchPos.x, touchPos.y)) {
                 game.setScreen(new GameScreen(game));
                 dispose();
+            } else if (creditButtonBounds.contains(touchPos.x, touchPos.y)) {
+                game.setScreen(new CreditsScreen(game));
             } else if (exitButtonBounds.contains(touchPos.x, touchPos.y)) {
                 Gdx.app.exit();
             }
@@ -98,5 +106,6 @@ public class MainMenuScreen implements Screen {
         batch.dispose();
         startGameButtonTexture.dispose();
         exitButtonTexture.dispose();
+        creditButtonTexture.dispose();
     }
 }
