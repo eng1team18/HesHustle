@@ -79,7 +79,9 @@ public class MainMenuScreen implements Screen {
                 dispose();
             } else if (creditButtonBounds.contains(touchPos.x, touchPos.y)) {
                 game.setScreen(new CreditsScreen(game));
+                dispose();
             } else if (exitButtonBounds.contains(touchPos.x, touchPos.y)) {
+                dispose();
                 Gdx.app.exit();
             }
         }
