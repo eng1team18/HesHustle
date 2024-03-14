@@ -46,7 +46,7 @@ public class GameScreen implements Screen {
         camera.setToOrtho(false, 800, 480);
 
         //rendering character and background model
-        spriteSheet = new Texture(Gdx.files.internal("GirlBunSpriteSheet.png"));
+        spriteSheet = new Texture(Gdx.files.internal("GirlDarkSpriteSheet.png"));
         character = new Player(spriteSheet);
         playableMap = new Texture(Gdx.files.internal("checkerboard.png"));
 
