@@ -14,11 +14,19 @@ import com.badlogic.gdx.utils.ScreenUtils;
 public class GameScreen implements Screen {
     final HesHustle game;
     SpriteBatch batch;
-    Texture character;
+    Player character;
+    Texture spriteSheet;
     Texture playableMap;
     Array<Building> buildings;
     OrthographicCamera camera;
     Rectangle player;
+
+    //Movement boolean variables
+    boolean leftMove;
+    boolean rightMove;
+    boolean upMove;
+    boolean downMove;
+
     float mapWidth, mapHeight;
     EnergyBar energyBar;
     OrthographicCamera hudCamera;
@@ -38,7 +46,8 @@ public class GameScreen implements Screen {
         camera.setToOrtho(false, 800, 480);
 
         //rendering character and background model
-        character = new Texture(Gdx.files.internal("Octodecimals.png"));
+        spriteSheet = new Texture(Gdx.files.internal("GirlBunSpriteSheet.png"));
+        character = new Player(spriteSheet);
         playableMap = new Texture(Gdx.files.internal("checkerboard.png"));
 
         // Building textures
@@ -62,10 +71,16 @@ public class GameScreen implements Screen {
 
         //creating player rectangle
         player = new Rectangle();
-        player.x = 800 / 2 - 64 / 2;
-        player.y = 20;
-        player.width = 64;
-        player.height = 64;
+        player.x = 800 / 2 - 36 / 2;
+        player.y = 24;
+        player.width = 31;
+        player.height = 88;
+
+        //Movement boolean variables
+        leftMove = false;
+        rightMove = false;
+        upMove = false;
+        downMove = false;
 
         // Adding building to the map
         // Add more building by just copy-pasting these and assigning the texture
@@ -150,19 +165,21 @@ public class GameScreen implements Screen {
         camera.position.y = player.getY() + player.getHeight()/2;
         camera.update();
 
-        //draw map and character image over player
+        //draw map image
         ScreenUtils.clear(0.3765f, 0.4588f, 0.5882f, 1);
         batch.setProjectionMatrix(camera.combined);
 
         batch.begin();
         batch.draw(playableMap, -(playableMap.getWidth()/2), -(playableMap.getHeight()/2));
-        batch.draw(character, player.x, player.y);
 
         // Drawing the buildings
         for(Building building : buildings) {
             batch.draw(building.texture, building.bounds.x, building.bounds.y, building.bounds.width, building.bounds.height);
         }
         batch.end();
+
+        //Draw character sprite over player
+        character.update(batch, player.getX(), player.getY());
 
         //Camera for the HUDs
         hudCamera.update();
@@ -187,11 +204,49 @@ public class GameScreen implements Screen {
             float minY = -(mapHeight / 2); // Bottom edge of the map
             float maxY = (mapHeight / 2) - player.height; // Top edge of the map
 
-            //performing character movement
-            if (Gdx.input.isKeyPressed(Input.Keys.A)) potentialX -= deltaX;
-            if (Gdx.input.isKeyPressed(Input.Keys.D)) potentialX += deltaX;
-            if (Gdx.input.isKeyPressed(Input.Keys.W)) potentialY += deltaY;
-            if (Gdx.input.isKeyPressed(Input.Keys.S)) potentialY -= deltaY;
+            //Performing character movement and changing current animation to reflect direction
+            //Up move
+            if (Gdx.input.isKeyPressed(Input.Keys.W)){
+                if (character.getCurrentAnimation() != character.BACKWALK)
+                    character.setCurrentAnimation(character.BACKWALK);
+                upMove = true;
+                potentialY += deltaY;
+            } else upMove = false;
+            //Left move
+            //If also moving up, don't overwrite up animation
+            if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+                if (character.getCurrentAnimation() != character.LEFTWALK && !upMove)
+                    character.setCurrentAnimation(character.LEFTWALK);
+                leftMove = true;
+                potentialX -= deltaX;
+            } else leftMove = false;
+            //Right move
+            //If also moving up, don't overwrite up animation
+            if (Gdx.input.isKeyPressed(Input.Keys.D)){
+                if (character.getCurrentAnimation() != character.RIGHTWALK && !upMove)
+                    character.setCurrentAnimation(character.RIGHTWALK);
+                rightMove = true;
+                potentialX += deltaX;
+            } else rightMove = false;
+            //Down move
+            //If current animation is leftWalk or rightWalk, use that animation, else switch to leftWalk
+            if (Gdx.input.isKeyPressed(Input.Keys.S)){
+                if(character.getCurrentAnimation() != character.LEFTWALK &&
+                        character.getCurrentAnimation() != character.RIGHTWALK )
+                    character.setCurrentAnimation(character.LEFTWALK);
+                downMove = true;
+                potentialY -= deltaY;
+            } else downMove = false;
+
+            //Set idle animations based off previous direction
+            if (!leftMove && !rightMove && !upMove && !downMove){
+                if(character.getCurrentAnimation() == character.LEFTWALK)
+                    character.setCurrentAnimation(character.LEFTIDLE);
+                else if(character.getCurrentAnimation() == character.RIGHTWALK)
+                    character.setCurrentAnimation(character.RIGHTIDLE);
+                else if(character.getCurrentAnimation() == character.BACKWALK)
+                character.setCurrentAnimation(character.BACKIDLE);
+            }
 
             //Remove later, keybindings for testing only
             if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
@@ -255,7 +310,7 @@ public class GameScreen implements Screen {
     @Override
     public void dispose () {
         batch.dispose();
-        character.dispose();
+        spriteSheet.dispose();
         playableMap.dispose();
         energyBar.dispose();
         clockHUD.dispose();
