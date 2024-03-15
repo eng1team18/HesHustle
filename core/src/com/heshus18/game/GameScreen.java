@@ -6,28 +6,32 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.maps.tiled.*;
 
 public class GameScreen implements Screen {
     final HesHustle game;
     SpriteBatch batch;
-    Texture character;
-    Texture playableMap;
+    Player player;
+    Texture spriteSheet, playableMap;
     Array<Building> buildings;
     OrthographicCamera camera;
-    Rectangle player;
+    TiledMap background;
+
     float mapWidth, mapHeight;
     EnergyBar energyBar;
     OrthographicCamera hudCamera;
     private Time gameTime;
     private Clock clockHUD;
+    private OrthogonalTiledMapRenderer renderer;
     PopUpManager popUpManager;
     Score score = Score.getInstance();
 
-    public GameScreen(final HesHustle game) {
+    public GameScreen(final HesHustle game, String spriteChoice) {
         this.game = game;
 
         // Use the game's batch for drawing
@@ -38,8 +42,13 @@ public class GameScreen implements Screen {
         camera.setToOrtho(false, 800, 480);
 
         //rendering character and background model
-        character = new Texture(Gdx.files.internal("Octodecimals.png"));
+        spriteSheet = new Texture(Gdx.files.internal(spriteChoice));
+        player = new Player(spriteSheet);
         playableMap = new Texture(Gdx.files.internal("checkerboard.png"));
+        background = new TmxMapLoader().load("testmap.tmx");
+        float unitScale = 2f; //change this value for size?
+        renderer = new OrthogonalTiledMapRenderer(background, unitScale);
+
 
         // Building textures
         Texture buildingTexture1 = new Texture(Gdx.files.internal("building.png"));
@@ -59,13 +68,6 @@ public class GameScreen implements Screen {
 
         mapWidth = playableMap.getWidth();
         mapHeight = playableMap.getHeight();
-
-        //creating player rectangle
-        player = new Rectangle();
-        player.x = 800 / 2 - 64 / 2;
-        player.y = 20;
-        player.width = 64;
-        player.height = 64;
 
         // Adding building to the map
         // Add more building by just copy-pasting these and assigning the texture
@@ -150,19 +152,23 @@ public class GameScreen implements Screen {
         camera.position.y = player.getY() + player.getHeight()/2;
         camera.update();
 
-        //draw map and character image over player
+        //draw map image
         ScreenUtils.clear(0.3765f, 0.4588f, 0.5882f, 1);
         batch.setProjectionMatrix(camera.combined);
 
         batch.begin();
-        batch.draw(playableMap, -(playableMap.getWidth()/2), -(playableMap.getHeight()/2));
-        batch.draw(character, player.x, player.y);
+        //batch.draw(playableMap, -(playableMap.getWidth()/2), -(playableMap.getHeight()/2));
 
         // Drawing the buildings
         for(Building building : buildings) {
             batch.draw(building.texture, building.bounds.x, building.bounds.y, building.bounds.width, building.bounds.height);
         }
         batch.end();
+        renderer.setView(camera);
+        renderer.render();
+
+        //draw current player model
+        player.update(batch, player.getX(), player.getY());
 
         //Camera for the HUDs
         hudCamera.update();
@@ -174,24 +180,7 @@ public class GameScreen implements Screen {
         popUpManager.render(batch);
         batch.end();
 
-        // This is so W/S and D/A key still works when the other are colliding with objects
-        float deltaX = 200 * Gdx.graphics.getDeltaTime();
-        float deltaY = 200 * Gdx.graphics.getDeltaTime();
-        if (!popUpManager.isAnyPopUpVisible()) {
-            float potentialX = player.x + (Gdx.input.isKeyPressed(Input.Keys.D) ? deltaX : 0) - (Gdx.input.isKeyPressed(Input.Keys.A) ? deltaX : 0);
-            float potentialY = player.y + (Gdx.input.isKeyPressed(Input.Keys.W) ? deltaY : 0) - (Gdx.input.isKeyPressed(Input.Keys.S) ? deltaY : 0);
-
-            // Setting the map boundaries position
-            float minX = -(mapWidth / 2); // Left edge of the map
-            float maxX = (mapWidth / 2) - player.width; // Right edge of the map
-            float minY = -(mapHeight / 2); // Bottom edge of the map
-            float maxY = (mapHeight / 2) - player.height; // Top edge of the map
-
-            //performing character movement
-            if (Gdx.input.isKeyPressed(Input.Keys.A)) potentialX -= deltaX;
-            if (Gdx.input.isKeyPressed(Input.Keys.D)) potentialX += deltaX;
-            if (Gdx.input.isKeyPressed(Input.Keys.W)) potentialY += deltaY;
-            if (Gdx.input.isKeyPressed(Input.Keys.S)) potentialY -= deltaY;
+        if (!popUpManager.isAnyPopUpVisible()) {player.move(buildings, mapWidth, mapHeight);}
 
             //Remove later, keybindings for testing only
             if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
@@ -210,35 +199,6 @@ public class GameScreen implements Screen {
                 popUpManager.showPopUp("sleepingPopUp");
             }
 
-            potentialX = Math.max(Math.min(potentialX, maxX), minX);
-            potentialY = Math.max(Math.min(potentialY, maxY), minY);
-
-            Rectangle potentialPlayerX = new Rectangle(potentialX, player.y, player.width, player.height);
-            Rectangle potentialPlayerY = new Rectangle(player.x, potentialY, player.width, player.height);
-
-
-            // This is the building collision checks, check for either X, Y or both axis are colliding
-            boolean collisionX = false, collisionY = false;
-            for (Building building : buildings) {
-                if (potentialPlayerX.overlaps(building.bounds)) {
-                    collisionX = true;
-                }
-                if (potentialPlayerY.overlaps(building.bounds)) {
-                    collisionY = true;
-                }
-                if (collisionX && collisionY) break;
-            }
-
-            // Allow character to move if no collision
-            if (!collisionX) {
-                player.x = Math.max(Math.min(potentialX, maxX), minX);
-            }
-
-            if (!collisionY) {
-                player.y = Math.max(Math.min(potentialY, maxY), minY);
-            }
-        }
-
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             popUpManager.declineVisiblePopUp();
         }
@@ -255,7 +215,7 @@ public class GameScreen implements Screen {
     @Override
     public void dispose () {
         batch.dispose();
-        character.dispose();
+        spriteSheet.dispose();
         playableMap.dispose();
         energyBar.dispose();
         clockHUD.dispose();
