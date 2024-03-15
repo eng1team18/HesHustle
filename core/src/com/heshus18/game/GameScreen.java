@@ -53,7 +53,7 @@ public class GameScreen implements Screen {
         spriteSheet = new Texture(Gdx.files.internal("GirlDarkSpriteSheet.png"));
         character = new Player(spriteSheet);
         playableMap = new Texture(Gdx.files.internal("checkerboard.png"));
-        background = new TmxMapLoader().load("test_tilemap.tmx");
+        background = new TmxMapLoader().load("testmap.tmx");
         float unitScale = 2f; //change this value for size?
         renderer = new OrthogonalTiledMapRenderer(background, unitScale);
 
