@@ -16,9 +16,14 @@ import com.badlogic.gdx.maps.tiled.*;
 public class GameScreen implements Screen {
     final HesHustle game;
     SpriteBatch batch;
+<<<<<<< Updated upstream
     Player character;
     Texture spriteSheet;
     Texture playableMap;
+=======
+    Player player;
+    Texture spriteSheet, playableMap;
+>>>>>>> Stashed changes
     Array<Building> buildings;
     OrthographicCamera camera;
     Rectangle player;
@@ -202,6 +207,7 @@ public class GameScreen implements Screen {
         popUpManager.render(batch);
         batch.end();
 
+<<<<<<< Updated upstream
         // This is so W/S and D/A key still works when the other are colliding with objects
         float deltaX = 200 * Gdx.graphics.getDeltaTime();
         float deltaY = 200 * Gdx.graphics.getDeltaTime();
@@ -258,6 +264,10 @@ public class GameScreen implements Screen {
                 else if(character.getCurrentAnimation() == character.BACKWALK)
                 character.setCurrentAnimation(character.BACKIDLE);
             }
+=======
+        //perform player movement if no pop-up is visible
+        if (!popUpManager.isAnyPopUpVisible()) {player.move(buildings, mapWidth, mapHeight);}
+>>>>>>> Stashed changes
 
             //Remove later, keybindings for testing only
             if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
