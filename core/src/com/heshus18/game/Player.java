@@ -15,33 +15,16 @@ import com.badlogic.gdx.utils.Array;
 
 public class Player {
     //No. of rows/columns in sprite sheet, and what animation each row represents
-    final int COLS;
-    final int ROWS;
-    final int LEFTIDLE;
-    final int RIGHTIDLE;
-    final int BACKIDLE;
-    final int LEFTWALK;
-    final int RIGHTWALK;
-    final int BACKWALK;
-
+    final int COLS, ROWS;
+    final int LEFTIDLE, RIGHTIDLE, BACKIDLE, LEFTWALK, RIGHTWALK, BACKWALK;
     private int currentAnimation;
     private float stateTime;
 
     //Animation classes for each animation
-    Animation<TextureRegion> leftIdle;
-    Animation<TextureRegion> rightIdle;
-    Animation<TextureRegion> backIdle;
-    Animation<TextureRegion> leftWalk;
-    Animation<TextureRegion> rightWalk;
-    Animation<TextureRegion> backWalk;
+    Animation<TextureRegion> leftIdle, rightIdle, backIdle, leftWalk, rightWalk, backWalk;
 
     //Array containing all frames of each animation
-    TextureRegion [] leftIdleFrames;
-    TextureRegion [] rightIdleFrames;
-    TextureRegion [] backIdleFrames;
-    TextureRegion [] leftWalkFrames;
-    TextureRegion [] rightWalkFrames;
-    TextureRegion [] backWalkFrames;
+    TextureRegion [] leftIdleFrames, rightIdleFrames, backIdleFrames, leftWalkFrames, rightWalkFrames, backWalkFrames;
 
     TextureRegion currentFrame;
     Animation [] animations;
@@ -191,21 +174,19 @@ public class Player {
         batch.end();
     }
 
-    public void move(PopUpManager popUpManager, Array<Building> buildings, float mapWidth, float mapHeight){
+    public void move(Array<Building> buildings, float mapWidth, float mapHeight){
         float deltaX = 200 * Gdx.graphics.getDeltaTime();
         float deltaY = 200 * Gdx.graphics.getDeltaTime();
 
-        // This is so W/S and D/A key still works when the other are colliding with objects
-        if (!popUpManager.isAnyPopUpVisible()) {
-            //an array representing potential [potentialX, potentialY]
-            float potentialX = player.x + (Gdx.input.isKeyPressed(Input.Keys.D) ? deltaX : 0) - (Gdx.input.isKeyPressed(Input.Keys.A) ? deltaX : 0);
-            float potentialY = player.y + (Gdx.input.isKeyPressed(Input.Keys.W) ? deltaY : 0) - (Gdx.input.isKeyPressed(Input.Keys.S) ? deltaY : 0);
+        //an array representing potential [potentialX, potentialY]
+        float potentialX = player.x + (Gdx.input.isKeyPressed(Input.Keys.D) ? deltaX : 0) - (Gdx.input.isKeyPressed(Input.Keys.A) ? deltaX : 0);
+        float potentialY = player.y + (Gdx.input.isKeyPressed(Input.Keys.W) ? deltaY : 0) - (Gdx.input.isKeyPressed(Input.Keys.S) ? deltaY : 0);
 
-            // Setting the map boundaries position
-            float minX = -(mapWidth / 2); // Left edge of the map
-            float maxX = (mapWidth / 2) - player.width; // Right edge of the map
-            float minY = -(mapHeight / 2); // Bottom edge of the map
-            float maxY = (mapHeight / 2) - player.height; // Top edge of the map
+        // Setting the map boundaries position
+        float minX = -(mapWidth / 2); // Left edge of the map
+        float maxX = (mapWidth / 2) - player.width; // Right edge of the map
+        float minY = -(mapHeight / 2); // Bottom edge of the map
+        float maxY = (mapHeight / 2) - player.height; // Top edge of the map
 
         //Performing character movement and changing current animation to reflect direction
         //Up move
@@ -213,7 +194,7 @@ public class Player {
             if (this.getCurrentAnimation() != BACKWALK)
                 this.setCurrentAnimation(BACKWALK);
             upMove = true;
-            potentialX += deltaY;
+            potentialY += deltaY;
         } else upMove = false;
         //Left move
         //If also moving up, don't overwrite up animation
@@ -221,7 +202,7 @@ public class Player {
             if (this.getCurrentAnimation() != LEFTWALK && !upMove)
                 this.setCurrentAnimation(LEFTWALK);
             leftMove = true;
-            potentialY -= deltaX;
+            potentialX -= deltaX;
         } else leftMove = false;
         //Right move
         //If also moving up, don't overwrite up animation
@@ -277,7 +258,5 @@ public class Player {
             if (!collisionY) {
                 player.y = Math.max(Math.min(potentialY, maxY), minY);
             }
-        }
-
         }
 }

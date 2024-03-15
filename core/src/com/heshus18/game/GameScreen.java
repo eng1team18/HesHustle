@@ -17,8 +17,7 @@ public class GameScreen implements Screen {
     final HesHustle game;
     SpriteBatch batch;
     Player player;
-    Texture spriteSheet;
-    Texture playableMap;
+    Texture spriteSheet, playableMap;
     Array<Building> buildings;
     OrthographicCamera camera;
     TiledMap background;
@@ -181,7 +180,7 @@ public class GameScreen implements Screen {
         popUpManager.render(batch);
         batch.end();
 
-        player.move(popUpManager, buildings, mapWidth, mapHeight);
+        if (!popUpManager.isAnyPopUpVisible()) {player.move(buildings, mapWidth, mapHeight);}
 
             //Remove later, keybindings for testing only
             if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
