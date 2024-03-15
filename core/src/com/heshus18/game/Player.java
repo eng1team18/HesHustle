@@ -1,10 +1,13 @@
 package com.heshus18.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
 
 /**
  * Represents the player in the game, animating and drawing the player sprite depending on current action
@@ -42,6 +45,11 @@ public class Player {
 
     TextureRegion currentFrame;
     Animation [] animations;
+
+    //Movement boolean variables
+    boolean leftMove, rightMove, upMove, downMove;
+    //player hit box
+    Rectangle player;
 
     /**
      * Creates an instance of player.
@@ -127,6 +135,20 @@ public class Player {
 
         //Initialise starting animation
         setCurrentAnimation(LEFTIDLE);
+
+        //initialise movement variables
+        leftMove = false;
+        rightMove = false;
+        upMove = false;
+        downMove = false;
+
+        //create player hit box
+        player = new Rectangle();
+        player.x = 800 / 2 - 36 / 2;
+        player.y = 24;
+        player.width = 31;
+        player.height = 88;
+
     }
 
     /**
@@ -142,9 +164,16 @@ public class Player {
      *
      * @return current player animation
      */
-    public int getCurrentAnimation(){
-        return currentAnimation;
-    }
+    public int getCurrentAnimation() {return currentAnimation;}
+
+    /**
+     *
+     * @return player's x coordinate
+     */
+    public float getX() {return player.getX();}
+    public float getY() {return player.getY();}
+    public float getWidth() {return player.getWidth();}
+    public float getHeight() {return player.getHeight();}
 
     /**
      * Updates the sprite batch with a drawing of the current animation frame
@@ -161,4 +190,94 @@ public class Player {
         batch.draw(currentFrame, playerX -47, playerY, 128, 128);
         batch.end();
     }
+
+    public void move(PopUpManager popUpManager, Array<Building> buildings, float mapWidth, float mapHeight){
+        float deltaX = 200 * Gdx.graphics.getDeltaTime();
+        float deltaY = 200 * Gdx.graphics.getDeltaTime();
+
+        // This is so W/S and D/A key still works when the other are colliding with objects
+        if (!popUpManager.isAnyPopUpVisible()) {
+            //an array representing potential [potentialX, potentialY]
+            float potentialX = player.x + (Gdx.input.isKeyPressed(Input.Keys.D) ? deltaX : 0) - (Gdx.input.isKeyPressed(Input.Keys.A) ? deltaX : 0);
+            float potentialY = player.y + (Gdx.input.isKeyPressed(Input.Keys.W) ? deltaY : 0) - (Gdx.input.isKeyPressed(Input.Keys.S) ? deltaY : 0);
+
+            // Setting the map boundaries position
+            float minX = -(mapWidth / 2); // Left edge of the map
+            float maxX = (mapWidth / 2) - player.width; // Right edge of the map
+            float minY = -(mapHeight / 2); // Bottom edge of the map
+            float maxY = (mapHeight / 2) - player.height; // Top edge of the map
+
+        //Performing character movement and changing current animation to reflect direction
+        //Up move
+        if (Gdx.input.isKeyPressed(Input.Keys.W)){
+            if (this.getCurrentAnimation() != BACKWALK)
+                this.setCurrentAnimation(BACKWALK);
+            upMove = true;
+            potentialX += deltaY;
+        } else upMove = false;
+        //Left move
+        //If also moving up, don't overwrite up animation
+        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+            if (this.getCurrentAnimation() != LEFTWALK && !upMove)
+                this.setCurrentAnimation(LEFTWALK);
+            leftMove = true;
+            potentialY -= deltaX;
+        } else leftMove = false;
+        //Right move
+        //If also moving up, don't overwrite up animation
+        if (Gdx.input.isKeyPressed(Input.Keys.D)){
+            if (this.getCurrentAnimation() != RIGHTWALK && !upMove)
+                this.setCurrentAnimation(RIGHTWALK);
+            rightMove = true;
+            potentialX += deltaX;
+        } else rightMove = false;
+        //Down move
+        //If current animation is leftWalk or rightWalk, use that animation, else switch to leftWalk
+        if (Gdx.input.isKeyPressed(Input.Keys.S)){
+            if(this.getCurrentAnimation() != LEFTWALK &&
+                    this.getCurrentAnimation() != RIGHTWALK )
+                this.setCurrentAnimation(LEFTWALK);
+            downMove = true;
+            potentialY -= deltaY;
+        } else downMove = false;
+
+        //Set idle animations based off previous direction
+        if (!leftMove && !rightMove && !upMove && !downMove){
+            if(this.getCurrentAnimation() == LEFTWALK)
+                this.setCurrentAnimation(LEFTIDLE);
+            else if(this.getCurrentAnimation() == RIGHTWALK)
+                this.setCurrentAnimation(RIGHTIDLE);
+            else if(this.getCurrentAnimation() == BACKWALK)
+                this.setCurrentAnimation(BACKIDLE);
+        }
+
+        potentialX = Math.max(Math.min(potentialX, maxX), minX);
+        potentialY = Math.max(Math.min(potentialY, maxY), minY);
+
+        Rectangle potentialPlayerX = new Rectangle(potentialX, player.y, player.width, player.height);
+        Rectangle potentialPlayerY = new Rectangle(player.x, potentialY, player.width, player.height);
+
+            // This is the building collision checks, check for either X, Y or both axis are colliding
+            boolean collisionX = false, collisionY = false;
+            for (Building building : buildings) {
+                if (potentialPlayerX.overlaps(building.bounds)) {
+                    collisionX = true;
+                }
+                if (potentialPlayerY.overlaps(building.bounds)) {
+                    collisionY = true;
+                }
+                if (collisionX && collisionY) break;
+            }
+
+            // Allow character to move if no collision
+            if (!collisionX) {
+                player.x = Math.max(Math.min(potentialX, maxX), minX);
+            }
+
+            if (!collisionY) {
+                player.y = Math.max(Math.min(potentialY, maxY), minY);
+            }
+        }
+
+        }
 }
