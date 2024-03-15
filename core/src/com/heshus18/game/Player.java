@@ -12,17 +12,33 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class Player {
     //No. of rows/columns in sprite sheet, and what animation each row represents
-    final int COLS, ROWS;
-    final int LEFTIDLE, RIGHTIDLE, BACKIDLE, LEFTWALK, RIGHTWALK, BACKWALK;
+    final int COLS;
+    final int ROWS;
+    final int LEFTIDLE;
+    final int RIGHTIDLE;
+    final int BACKIDLE;
+    final int LEFTWALK;
+    final int RIGHTWALK;
+    final int BACKWALK;
 
     private int currentAnimation;
     private float stateTime;
 
     //Animation classes for each animation
-    Animation<TextureRegion> leftIdle, rightIdle, backIdle, leftWalk, rightWalk, backWalk;
+    Animation<TextureRegion> leftIdle;
+    Animation<TextureRegion> rightIdle;
+    Animation<TextureRegion> backIdle;
+    Animation<TextureRegion> leftWalk;
+    Animation<TextureRegion> rightWalk;
+    Animation<TextureRegion> backWalk;
 
     //Array containing all frames of each animation
-    TextureRegion [] leftIdleFrames, rightIdleFrames, backIdleFrames, leftWalkFrames, rightWalkFrames, backWalkFrames;
+    TextureRegion [] leftIdleFrames;
+    TextureRegion [] rightIdleFrames;
+    TextureRegion [] backIdleFrames;
+    TextureRegion [] leftWalkFrames;
+    TextureRegion [] rightWalkFrames;
+    TextureRegion [] backWalkFrames;
 
     TextureRegion currentFrame;
     Animation [] animations;
@@ -145,101 +161,4 @@ public class Player {
         batch.draw(currentFrame, playerX -47, playerY, 128, 128);
         batch.end();
     }
-<<<<<<< Updated upstream
-=======
-
-    /**
-     * Moves the player around the map depending on key inputs
-     * Detects collision with map borders/buildings and doesn't let the player pass through these
-     * Updates player animations depending on moving or idle states and previous facing direction
-     * @param buildings array of building objects, used for detecting player collision
-     * @param mapWidth float containing width of map
-     * @param mapHeight float containing height of map
-     */
-    public void move(Array<Building> buildings, float mapWidth, float mapHeight) {
-        float deltaX = 200 * Gdx.graphics.getDeltaTime();
-        float deltaY = 200 * Gdx.graphics.getDeltaTime();
-
-        // This is so W/S and D/A key still works when the other are colliding with objects
-        float potentialX = player.x + (Gdx.input.isKeyPressed(Input.Keys.D) ? deltaX : 0) - (Gdx.input.isKeyPressed(Input.Keys.A) ? deltaX : 0);
-        float potentialY = player.y + (Gdx.input.isKeyPressed(Input.Keys.W) ? deltaY : 0) - (Gdx.input.isKeyPressed(Input.Keys.S) ? deltaY : 0);
-
-        // Setting the map boundaries position
-        float minX = -(mapWidth / 2); // Left edge of the map
-        float maxX = (mapWidth / 2) - player.width; // Right edge of the map
-        float minY = -(mapHeight / 2); // Bottom edge of the map
-        float maxY = (mapHeight / 2) - player.height; // Top edge of the map
-
-        //Performing character movement and changing current animation to reflect direction
-        //Up move
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            if (this.getCurrentAnimation() != BACKWALK)
-                this.setCurrentAnimation(BACKWALK);
-            upMove = true;
-            potentialY += deltaY;
-        } else upMove = false;
-        //Left move
-        //If also moving up, don't overwrite up animation
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            if (this.getCurrentAnimation() != LEFTWALK && !upMove)
-                this.setCurrentAnimation(LEFTWALK);
-            leftMove = true;
-            potentialX -= deltaX;
-        } else leftMove = false;
-        //Right move
-        //If also moving up, don't overwrite up animation
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            if (this.getCurrentAnimation() != RIGHTWALK && !upMove)
-                this.setCurrentAnimation(RIGHTWALK);
-            rightMove = true;
-            potentialX += deltaX;
-        } else rightMove = false;
-        //Down move
-        //If current animation is leftWalk or rightWalk, use that animation, else switch to leftWalk
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            if (this.getCurrentAnimation() != LEFTWALK &&
-                    this.getCurrentAnimation() != RIGHTWALK)
-                this.setCurrentAnimation(LEFTWALK);
-            downMove = true;
-            potentialY -= deltaY;
-        } else downMove = false;
-
-        //Set idle animations based off previous direction
-        if (!leftMove && !rightMove && !upMove && !downMove) {
-            if (this.getCurrentAnimation() == LEFTWALK)
-                this.setCurrentAnimation(LEFTIDLE);
-            else if (this.getCurrentAnimation() == RIGHTWALK)
-                this.setCurrentAnimation(RIGHTIDLE);
-            else if (this.getCurrentAnimation() == BACKWALK)
-                this.setCurrentAnimation(BACKIDLE);
-        }
-
-        potentialX = Math.max(Math.min(potentialX, maxX), minX);
-        potentialY = Math.max(Math.min(potentialY, maxY), minY);
-
-        Rectangle potentialPlayerX = new Rectangle(potentialX, player.y, player.width, player.height);
-        Rectangle potentialPlayerY = new Rectangle(player.x, potentialY, player.width, player.height);
-
-        // This is the building collision checks, check for either X, Y or both axis are colliding
-        boolean collisionX = false, collisionY = false;
-        for (Building building : buildings) {
-            if (potentialPlayerX.overlaps(building.bounds)) {
-                collisionX = true;
-            }
-            if (potentialPlayerY.overlaps(building.bounds)) {
-                collisionY = true;
-            }
-            if (collisionX && collisionY) break;
-        }
-
-        // Allow character to move if no collision
-        if (!collisionX) {
-            player.x = Math.max(Math.min(potentialX, maxX), minX);
-        }
-
-        if (!collisionY) {
-            player.y = Math.max(Math.min(potentialY, maxY), minY);
-        }
-    }
->>>>>>> Stashed changes
 }
