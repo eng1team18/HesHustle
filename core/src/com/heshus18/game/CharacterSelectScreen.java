@@ -15,10 +15,10 @@ public class CharacterSelectScreen implements Screen {
     OrthographicCamera camera;
     SpriteBatch batch;
     BitmapFont font;
-    private Rectangle girlLightButtonBounds;
-    private Rectangle girlDarkButtonBounds;
+    private Rectangle kenzieButtonBounds;
+    private Rectangle isabelleButtonBounds;
 
-    private Texture girlDark, girlLight;
+    private Texture kenzie, isabelle;
 
     public CharacterSelectScreen(HesHustle game){
         this.game = game;
@@ -26,21 +26,21 @@ public class CharacterSelectScreen implements Screen {
         camera.setToOrtho(false, 800, 480);
         batch = new SpriteBatch();
 
-        girlLight = new Texture(Gdx.files.internal("GirlLightPreview.png"));
-        girlDark = new Texture(Gdx.files.internal("GirlDarkPreview.png"));
+        kenzie = new Texture(Gdx.files.internal("KenziePreview.png"));
+        isabelle = new Texture(Gdx.files.internal("IsabellePreview.png"));
         font = new BitmapFont();
         font.getData().setScale(2f);
 
         float buttonWidth = 384;
         float buttonHeight = 384;
         float padding = 10;
-        float posXLight = 0; //GirlLight button position
-        float posXDark = 800 - buttonWidth; //GirlDark button position
+        float posXLight = 0; //Kenzie button position
+        float posXDark = 800 - buttonWidth; //Isabelle button position
         float posY = 20; //Button height
 
         // Button bounding box
-        girlLightButtonBounds = new Rectangle(posXLight, posY, buttonWidth, buttonHeight);
-        girlDarkButtonBounds = new Rectangle(posXDark, posY, buttonWidth, buttonHeight);
+        kenzieButtonBounds = new Rectangle(posXLight, posY, buttonWidth, buttonHeight);
+        isabelleButtonBounds = new Rectangle(posXDark, posY, buttonWidth, buttonHeight);
     }
 
     public void render(float delta){
@@ -51,21 +51,21 @@ public class CharacterSelectScreen implements Screen {
 
         batch.begin();
         font.draw(batch, "Choose Character", 280, 450);
-        batch.draw(girlLight, girlLightButtonBounds.x, girlLightButtonBounds.y,
-                girlLightButtonBounds.width, girlLightButtonBounds.height);
-        batch.draw(girlDark, girlDarkButtonBounds.x, girlDarkButtonBounds.y,
-                girlDarkButtonBounds.width, girlDarkButtonBounds.height);
+        batch.draw(kenzie, kenzieButtonBounds.x, kenzieButtonBounds.y,
+                kenzieButtonBounds.width, kenzieButtonBounds.height);
+        batch.draw(isabelle, isabelleButtonBounds.x, isabelleButtonBounds.y,
+                isabelleButtonBounds.width, isabelleButtonBounds.height);
         batch.end();
 
         if (Gdx.input.justTouched()) {
             Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
             camera.unproject(touchPos);
 
-            if (girlLightButtonBounds.contains(touchPos.x, touchPos.y)) {
-                game.setScreen(new GameScreen(game, "GirlLightSpriteSheet.png"));
+            if (kenzieButtonBounds.contains(touchPos.x, touchPos.y)) {
+                game.setScreen(new GameScreen(game, "KenzieSpriteSheet.png"));
                 dispose();
-            } else if (girlDarkButtonBounds.contains(touchPos.x, touchPos.y)) {
-                game.setScreen(new GameScreen(game, "GirlDarkSpriteSheet.png"));
+            } else if (isabelleButtonBounds.contains(touchPos.x, touchPos.y)) {
+                game.setScreen(new GameScreen(game, "IsabelleSpriteSheet.png"));
                 dispose();
             }
         }
@@ -92,8 +92,8 @@ public class CharacterSelectScreen implements Screen {
     @Override
     public void dispose() {
         batch.dispose();
-        girlDark.dispose();
-        girlLight.dispose();
+        isabelle.dispose();
+        kenzie.dispose();
         font.dispose();
     }
 }
