@@ -6,10 +6,12 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.maps.tiled.*;
 
 public class GameScreen implements Screen {
     final HesHustle game;
@@ -20,6 +22,7 @@ public class GameScreen implements Screen {
     Array<Building> buildings;
     OrthographicCamera camera;
     Rectangle player;
+    TiledMap background;
 
     //Movement boolean variables
     boolean leftMove;
@@ -32,6 +35,7 @@ public class GameScreen implements Screen {
     OrthographicCamera hudCamera;
     private Time gameTime;
     private Clock clockHUD;
+    private OrthogonalTiledMapRenderer renderer;
     PopUpManager popUpManager;
     Score score = Score.getInstance();
 
@@ -49,6 +53,10 @@ public class GameScreen implements Screen {
         spriteSheet = new Texture(Gdx.files.internal("GirlDarkSpriteSheet.png"));
         character = new Player(spriteSheet);
         playableMap = new Texture(Gdx.files.internal("checkerboard.png"));
+        background = new TmxMapLoader().load("test_tilemap.tmx");
+        float unitScale = 2f; //change this value for size?
+        renderer = new OrthogonalTiledMapRenderer(background, unitScale);
+
 
         // Building textures
         Texture buildingTexture1 = new Texture(Gdx.files.internal("building.png"));
@@ -170,13 +178,16 @@ public class GameScreen implements Screen {
         batch.setProjectionMatrix(camera.combined);
 
         batch.begin();
-        batch.draw(playableMap, -(playableMap.getWidth()/2), -(playableMap.getHeight()/2));
+        //batch.draw(playableMap, -(playableMap.getWidth()/2), -(playableMap.getHeight()/2));
+
 
         // Drawing the buildings
         for(Building building : buildings) {
             batch.draw(building.texture, building.bounds.x, building.bounds.y, building.bounds.width, building.bounds.height);
         }
         batch.end();
+        renderer.setView(camera);
+        renderer.render();
 
         //Draw character sprite over player
         character.update(batch, player.getX(), player.getY());
