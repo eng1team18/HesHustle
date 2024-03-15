@@ -75,7 +75,7 @@ public class MainMenuScreen implements Screen {
             camera.unproject(touchPos);
 
             if (startGameButtonBounds.contains(touchPos.x, touchPos.y)) {
-                game.setScreen(new GameScreen(game));
+                game.setScreen(new CharacterSelectScreen(game));
                 dispose();
             } else if (creditButtonBounds.contains(touchPos.x, touchPos.y)) {
                 game.setScreen(new CreditsScreen(game));
