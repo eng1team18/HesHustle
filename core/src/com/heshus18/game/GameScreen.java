@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -57,14 +56,14 @@ public class GameScreen implements Screen {
 
         //creating a camera for the HUDs
         hudCamera = new OrthographicCamera();
-        hudCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        hudCamera.setToOrtho(false, 800, 480);
         hudCamera.update();
 
-        energyBar = new EnergyBar(100f, 250f, 35f, new Vector2(20f, Gdx.graphics.getHeight() - 45f),
+        energyBar = new EnergyBar(100f, 250f, 35f, new Vector2(20f, 480 - 45f),
                 "energyBarBackground.png", "energyBarForeground.png");
 
         gameTime = new Time();
-        clockHUD = new Clock(new Vector2(Gdx.graphics.getWidth() - 100, Gdx.graphics.getHeight() - 20f), gameTime);
+        clockHUD = new Clock(new Vector2(800 - 100, 480 - 20f), gameTime);
 
         mapWidth = playableMap.getWidth();
         mapHeight = playableMap.getHeight();
@@ -85,6 +84,7 @@ public class GameScreen implements Screen {
             else {
                 gameTime.addTime(120);
                 score.incrementTimeStudy();
+                popUpManager.showPopUp("studySucess");
             }
         });
         popUpManager.addPopUp(studyPopUp);
@@ -97,6 +97,7 @@ public class GameScreen implements Screen {
             else {
                 gameTime.addTime(60);
                 score.incrementTimeAte();
+                popUpManager.showPopUp("eatingSucess");
             }
         });
         popUpManager.addPopUp(eatingPopUp);
@@ -109,6 +110,7 @@ public class GameScreen implements Screen {
             else {
                 gameTime.addTime(120);
                 score.incrementTimeActivity();
+                popUpManager.showPopUp("activitySucess");
             }
         });
         popUpManager.addPopUp(activityPopUp);
@@ -132,6 +134,9 @@ public class GameScreen implements Screen {
                     } else {
                         energyBar.addEnergy(50f);
                     }
+                    String newMessage = "You went to bed! It's now day " + gameTime.getDayName(gameTime.getDay()) + ".";
+                    popUpManager.updateMessage("nextDay", newMessage);
+                    popUpManager.showPopUp("nextDay");
                 }
             }
         });
@@ -143,6 +148,20 @@ public class GameScreen implements Screen {
 
         PopUp cantSleepPopUp = new PopUp("cantSleepPopUp", "It is too early to go to bed!\n\nCome back later.", 200, 170, 400, 170, hudCamera, "warning");
         popUpManager.addPopUp(cantSleepPopUp);
+
+        PopUp eatingSucess = new PopUp("eatingSucess", "You've finished eating!", 0, 0, 800, 480, hudCamera, "info");
+        popUpManager.addPopUp(eatingSucess);
+
+        PopUp studySucess = new PopUp("studySucess", "You've finished studying!", 0, 0, 800, 480, hudCamera, "info");
+        popUpManager.addPopUp(studySucess);
+
+        PopUp activitySucess = new PopUp("activitySucess", "You've finished a recreational activity!", 0, 0, 800, 480, hudCamera, "info");
+        popUpManager.addPopUp(activitySucess);
+
+        String message = "You went to bed! It's now day " + gameTime.getDayName(gameTime.getDay()) + ".";
+        PopUp nextDay = new PopUp("nextDay", message, 0, 0, 800, 480, hudCamera, "info");
+        popUpManager.addPopUp(nextDay);
+
     }
 
     @Override

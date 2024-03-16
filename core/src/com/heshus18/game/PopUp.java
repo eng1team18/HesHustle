@@ -4,9 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.TimeUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +33,8 @@ public class PopUp {
     private List<Runnable> confirmActions;
     private OrthographicCamera camera;
     private String type;
+    private long showTime;
+    private static final long popUpDuration = 2000;
 
     /**
      * Constructs a new PopUp with specified parameters.
@@ -41,7 +46,7 @@ public class PopUp {
      * @param width     The width of the pop-up.
      * @param height    The height of the pop-up.
      * @param camera    The game's camera, should be "hudCamera" for most of the time
-     * @param type      The type of the pop-up, either "prompt" for Confirm or Deny button pop-up or "warning" for a Close button only pop-up
+     * @param type      The type of the pop-up, either "prompt" for Confirm or Deny button pop-up, "warning" for a Close button only pop-up or "info" for a Pop-up that will auto close
      */
     public PopUp(String id, String message, float x, float y, float width, float height, OrthographicCamera camera, String type) {
         this.id = id;
@@ -79,11 +84,16 @@ public class PopUp {
         if (!isVisible) return;
 
         batch.draw(backgroundTexture, bounds.x, bounds.y, bounds.width, bounds.height);
-        font.draw(batch, message, bounds.x + 20, bounds.y + bounds.height - 20);
         if (type.equals("warning")) {
+            font.draw(batch, message, bounds.x + 20, bounds.y + bounds.height - 20);
             batch.draw(doneButtonTexture, doneButtonBounds.x, doneButtonBounds.y, doneButtonBounds.width, doneButtonBounds.height);
         }
+        else if (type.equals("info")) {
+            GlyphLayout layout = new GlyphLayout(font, message);
+            font.draw(batch, layout, bounds.x + (bounds.width - layout.width) / 2, bounds.y + (bounds.height + layout.height) / 2);
+        }
         else{
+            font.draw(batch, message, bounds.x + 20, bounds.y + bounds.height - 20);
             batch.draw(confirmButtonTexture, confirmButtonBounds.x, confirmButtonBounds.y, confirmButtonBounds.width, confirmButtonBounds.height);
             batch.draw(declineButtonTexture, declineButtonBounds.x, declineButtonBounds.y, declineButtonBounds.width, declineButtonBounds.height);
         }
@@ -103,6 +113,10 @@ public class PopUp {
      */
     public void update() {
         if (!isVisible) return;
+
+        if (type.equals("info") && TimeUtils.millis() > showTime + popUpDuration) {
+            isVisible = false;
+        }
 
         if (Gdx.input.justTouched()) {
             Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
@@ -131,6 +145,9 @@ public class PopUp {
      */
     public void setVisible(boolean visible) {
         this.isVisible = visible;
+        if (visible) {
+            showTime = TimeUtils.millis();
+        }
     }
 
     /**
@@ -147,6 +164,10 @@ public class PopUp {
      */
     public void decline() {
         this.isVisible = false;
+    }
+
+    public void updateMessage(String message) {
+        this.message = message;
     }
 
     public void dispose() {

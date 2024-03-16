@@ -83,6 +83,19 @@ public class PopUpManager {
         }
     }
 
+    /**
+     * Updates the message of a pop-up identified by its ID.
+     *
+     * @param id The unique identifier of the pop-up to update.
+     * @param message The new message to be set.
+     */
+    public void updateMessage(String id, String message) {
+        PopUp popUp = popUps.get(id);
+        if (popUp != null) {
+            popUp.updateMessage(message);
+        }
+    }
+
     public void dispose() {
         for (PopUp popUp : popUps.values()) {
             popUp.dispose();
