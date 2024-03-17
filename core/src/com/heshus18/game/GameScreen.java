@@ -46,7 +46,7 @@ public class GameScreen implements Screen {
         player = new Player(spriteSheet);
         playableMap = new Texture(Gdx.files.internal("checkerboard.png"));
         background = new TmxMapLoader().load("tileMap.tmx");
-        float unitScale = 2f; //change this value for size?
+        unitScale = 2f; //change this value for size?
         renderer = new OrthogonalTiledMapRenderer(background, unitScale);
 
 

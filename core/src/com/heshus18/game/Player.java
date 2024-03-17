@@ -248,9 +248,9 @@ public class Player {
             // This is the building collision checks, check for either X, Y or both axis are colliding
         boolean collisionX = false, collisionY = false;
         TiledMap map = GameScreen.background;
-        MapLayer buildingsAndBounds = map.getLayers().get("Objects");
+        MapLayer buildingsAndBounds = map.getLayers().get("Object Layer 1");
         MapObjects buildingsAndBoundsObjects = buildingsAndBounds.getObjects();
-        String[] objNames = {"Sleep", "Study", "Food", "Activity", "Bound", "Bound1", "Bound2", "Bound3"};
+        String[] objNames = {"Goodricke Hub", "CS Building"};
         for(String i : objNames){
             MapObject current = buildingsAndBoundsObjects.get(i);
             RectangleMapObject rectangleMapObject = (RectangleMapObject) current;
