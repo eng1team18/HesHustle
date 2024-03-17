@@ -1,0 +1,54 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "tileMap.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "animatedTileset.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 3
+        },
+        "texturesTilemap.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "texturesTileset.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tileMap.tmx": {
+            "scale": 0.33,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 1380.3030303030305,
+                "y": 1295.4545454545453
+            }
+        }
+    },
+    "frame.defaultDuration": 150,
+    "last.imagePath": "C:/Users/owenk/Documents/GitHub/HesHustle/assets",
+    "map.height": 64,
+    "map.lastUsedFormat": "tmx",
+    "map.width": 64,
+    "openFiles": [
+        "tileMap.tmx",
+        "texturesTileset.tsx",
+        "animatedTileset.tsx"
+    ],
+    "project": "untitled.tiled-project",
+    "recentFiles": [
+        "animatedTileset.tsx",
+        "texturesTileset.tsx",
+        "tileMap.tmx",
+        "texturesTilemap.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 64,
+        "width": 64
+    }
+}

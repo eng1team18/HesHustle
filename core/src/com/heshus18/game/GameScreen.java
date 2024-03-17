@@ -45,8 +45,8 @@ public class GameScreen implements Screen {
         spriteSheet = new Texture(Gdx.files.internal(spriteChoice));
         player = new Player(spriteSheet);
         playableMap = new Texture(Gdx.files.internal("checkerboard.png"));
-        background = new TmxMapLoader().load("testmap.tmx");
-        unitScale = 2f; //change this value for size? Effects Collision calculations in Player.java
+        background = new TmxMapLoader().load("tileMap.tmx");
+        float unitScale = 2f; //change this value for size?
         renderer = new OrthogonalTiledMapRenderer(background, unitScale);
 
 
