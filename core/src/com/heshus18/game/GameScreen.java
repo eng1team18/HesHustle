@@ -134,7 +134,7 @@ public class GameScreen implements Screen {
                     } else {
                         energyBar.addEnergy(50f);
                     }
-                    String newMessage = "You went to bed! It's now day " + gameTime.getDayName(gameTime.getDay()) + ".";
+                    String newMessage = "You went to bed! It's now " + gameTime.getDayName(gameTime.getDay()) + ".";
                     popUpManager.updateMessage("nextDay", newMessage);
                     popUpManager.showPopUp("nextDay");
                 }
@@ -158,7 +158,7 @@ public class GameScreen implements Screen {
         PopUp activitySucess = new PopUp("activitySucess", "You've finished a recreational activity!", 0, 0, 800, 480, hudCamera, "info");
         popUpManager.addPopUp(activitySucess);
 
-        String message = "You went to bed! It's now day " + gameTime.getDayName(gameTime.getDay()) + ".";
+        String message = "You went to bed! It's now " + gameTime.getDayName(gameTime.getDay()) + ".";
         PopUp nextDay = new PopUp("nextDay", message, 0, 0, 800, 480, hudCamera, "info");
         popUpManager.addPopUp(nextDay);
 
