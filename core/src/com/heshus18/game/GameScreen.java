@@ -19,7 +19,8 @@ public class GameScreen implements Screen {
     Texture spriteSheet, playableMap;
     Array<Building> buildings;
     OrthographicCamera camera;
-    TiledMap background;
+    public static TiledMap background;
+    public static float unitScale;
 
     float mapWidth, mapHeight;
     EnergyBar energyBar;
@@ -45,7 +46,7 @@ public class GameScreen implements Screen {
         player = new Player(spriteSheet);
         playableMap = new Texture(Gdx.files.internal("checkerboard.png"));
         background = new TmxMapLoader().load("testmap.tmx");
-        float unitScale = 2f; //change this value for size?
+        unitScale = 2f; //change this value for size? Effects Collision calculations in Player.java
         renderer = new OrthogonalTiledMapRenderer(background, unitScale);
 
 

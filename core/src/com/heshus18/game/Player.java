@@ -6,6 +6,11 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.MapLayer;
+import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.MapObjects;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
+import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
@@ -183,10 +188,10 @@ public class Player {
         float potentialY = player.y + (Gdx.input.isKeyPressed(Input.Keys.W) ? deltaY : 0) - (Gdx.input.isKeyPressed(Input.Keys.S) ? deltaY : 0);
 
         // Setting the map boundaries position
-        float minX = -(mapWidth / 2); // Left edge of the map
-        float maxX = (mapWidth / 2) - player.width; // Right edge of the map
-        float minY = -(mapHeight / 2); // Bottom edge of the map
-        float maxY = (mapHeight / 2) - player.height; // Top edge of the map
+        //float minX = -(mapWidth / 2); // Left edge of the map
+        //float maxX = (mapWidth / 2) - player.width; // Right edge of the map
+        //float minY = -(mapHeight / 2); // Bottom edge of the map
+        //float maxY = (mapHeight / 2) - player.height; // Top edge of the map
 
         //Performing character movement and changing current animation to reflect direction
         //Up move
@@ -232,31 +237,56 @@ public class Player {
                 this.setCurrentAnimation(BACKIDLE);
         }
 
-        potentialX = Math.max(Math.min(potentialX, maxX), minX);
-        potentialY = Math.max(Math.min(potentialY, maxY), minY);
-
+        //potentialX = Math.max(Math.min(potentialX, maxX), minX);
+        //potentialY = Math.max(Math.min(potentialY, maxY), minY);
+        float scaley = GameScreen.unitScale;
         Rectangle potentialPlayerX = new Rectangle(potentialX, player.y, player.width, player.height);
         Rectangle potentialPlayerY = new Rectangle(player.x, potentialY, player.width, player.height);
+        Rectangle potentialPlayerXScaled = new Rectangle(potentialX / scaley, player.y / scaley, player.width / scaley, player.height / scaley);
+        Rectangle potentialPlayerYScaled = new Rectangle(player.x / scaley, potentialY / scaley, player.width / scaley, player.height / scaley);
 
             // This is the building collision checks, check for either X, Y or both axis are colliding
-            boolean collisionX = false, collisionY = false;
-            for (Building building : buildings) {
-                if (potentialPlayerX.overlaps(building.bounds)) {
-                    collisionX = true;
-                }
-                if (potentialPlayerY.overlaps(building.bounds)) {
-                    collisionY = true;
-                }
-                if (collisionX && collisionY) break;
+        boolean collisionX = false, collisionY = false;
+        TiledMap map = GameScreen.background;
+        MapLayer buildingsAndBounds = map.getLayers().get("Objects");
+        MapObjects buildingsAndBoundsObjects = buildingsAndBounds.getObjects();
+        String[] objNames = {"Sleep", "Study", "Food", "Activity", "Bound", "Bound1", "Bound2", "Bound3"};
+        for(String i : objNames){
+            MapObject current = buildingsAndBoundsObjects.get(i);
+            RectangleMapObject rectangleMapObject = (RectangleMapObject) current;
+            Rectangle rectangle = rectangleMapObject.getRectangle();
+            //float x = rectangle.getX();
+            //float y = rectangle.getY();
+            //float width = rectangle.getWidth();
+            //float height = rectangle.getHeight();
+            if((potentialPlayerXScaled).overlaps(rectangle)){
+                collisionX = true;
+                System.out.println("Xcol"+i);
             }
+            if(potentialPlayerYScaled.overlaps(rectangle)){
+                collisionY = true;
+                System.out.println("Ycol"+i);
+            }
+            if (collisionX && collisionY) break;
+        }
+            //for (Building building : buildings) {
+            //    if (potentialPlayerX.overlaps(building.bounds)) {
+            //        collisionX = true;
+            //    }
+            //    if (potentialPlayerY.overlaps(building.bounds)) {
+            //     collisionY = true;
+            //    }
+            //    if (collisionX && collisionY) break;
+            //}
+
 
             // Allow character to move if no collision
             if (!collisionX) {
-                player.x = Math.max(Math.min(potentialX, maxX), minX);
+                player.x = potentialX;
             }
 
             if (!collisionY) {
-                player.y = Math.max(Math.min(potentialY, maxY), minY);
+                player.y = potentialY;
             }
         }
 }
