@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="64" height="64" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="54">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="64" height="64" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="58">
  <tileset firstgid="1" source="texturesTileset.tsx"/>
  <tileset firstgid="5" source="animatedTileset.tsx"/>
  <layer id="1" name="Tile Layer 1" width="64" height="64">
@@ -172,5 +172,9 @@
   <object id="49" name="Building15" x="1632" y="672" width="192" height="96"/>
   <object id="50" name="Building17" x="1664" y="800" width="128" height="160"/>
   <object id="51" name="Building18" x="1888" y="672" width="128" height="288"/>
+  <object id="54" name="Wall1" x="2054.55" y="-3.0303" width="45.4545" height="2063.64"/>
+  <object id="55" name="Wall2" x="-1" y="2061" width="2104" height="64"/>
+  <object id="56" name="Wall3" x="-64" y="0" width="88" height="2096"/>
+  <object id="57" name="Wall4" x="-120" y="-72" width="2312" height="88"/>
  </objectgroup>
 </map>
