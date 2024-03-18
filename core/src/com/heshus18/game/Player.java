@@ -237,11 +237,9 @@ public class Player {
                 this.setCurrentAnimation(BACKIDLE);
         }
 
-        //potentialX = Math.max(Math.min(potentialX, maxX), minX);
-        //potentialY = Math.max(Math.min(potentialY, maxY), minY);
         float scaley = GameScreen.unitScale;
-        Rectangle potentialPlayerX = new Rectangle(potentialX, player.y, player.width, player.height);
-        Rectangle potentialPlayerY = new Rectangle(player.x, potentialY, player.width, player.height);
+        float interactSize = 5;
+        Rectangle playerHitbox = new Rectangle((player.x - interactSize) / 2, (player.y - interactSize) / 2, player.width + interactSize, player.height + interactSize);
         Rectangle potentialPlayerXScaled = new Rectangle(potentialX / scaley, player.y / scaley, player.width / scaley, player.height / scaley);
         Rectangle potentialPlayerYScaled = new Rectangle(player.x / scaley, potentialY / scaley, player.width / scaley, player.height / scaley);
 
@@ -261,24 +259,29 @@ public class Player {
             //float height = rectangle.getHeight();
             if((potentialPlayerXScaled).overlaps(rectangle)){
                 collisionX = true;
-                System.out.println("Xcol"+i);
             }
             if(potentialPlayerYScaled.overlaps(rectangle)){
                 collisionY = true;
-                System.out.println("Ycol"+i);
             }
             if (collisionX && collisionY) break;
-        }
-            //for (Building building : buildings) {
-            //    if (potentialPlayerX.overlaps(building.bounds)) {
-            //        collisionX = true;
-            //    }
-            //    if (potentialPlayerY.overlaps(building.bounds)) {
-            //     collisionY = true;
-            //    }
-            //    if (collisionX && collisionY) break;
-            //}
 
+            if(playerHitbox.overlaps(rectangle)){
+                if(Gdx.input.isKeyJustPressed(Input.Keys.F)){
+                    if(i.equals("Ron Cooke")){
+                        GameScreen.keyPress = "F";
+                    }
+                    if(i.equals("Piazza")){
+                        GameScreen.keyPress = "G";
+                    }
+                    if(i.equals("Goodricke Hub")){
+                        GameScreen.keyPress = "H";
+                    }
+                    if(i.equals("Building1")){
+                        GameScreen.keyPress = "J";
+                    }
+                }
+            }
+        }
 
             // Allow character to move if no collision
             if (!collisionX) {

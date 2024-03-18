@@ -12,6 +12,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.maps.tiled.*;
 
+import java.util.Objects;
+
 public class GameScreen implements Screen {
     final HesHustle game;
     SpriteBatch batch;
@@ -21,6 +23,8 @@ public class GameScreen implements Screen {
     OrthographicCamera camera;
     public static TiledMap background;
     public static float unitScale;
+
+    public static String keyPress = "";
 
     float mapWidth, mapHeight;
     EnergyBar energyBar;
@@ -206,17 +210,21 @@ public class GameScreen implements Screen {
             if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
                 gameTime.nextDay();
             }
-            if (Gdx.input.isKeyJustPressed(Input.Keys.F)) {
+            if (keyPress.equals("F")) {
                 popUpManager.showPopUp("studyPopUp");
+                keyPress = "";
             }
-            if (Gdx.input.isKeyJustPressed(Input.Keys.G)) {
+            if (keyPress.equals("G")) {
                 popUpManager.showPopUp("eatingPopUp");
+                keyPress = "";
             }
-            if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
+            if (keyPress.equals("H")) {
                 popUpManager.showPopUp("activityPopUp");
+                keyPress = "";
             }
-            if (Gdx.input.isKeyJustPressed(Input.Keys.J)) {
+            if (keyPress.equals("J")) {
                 popUpManager.showPopUp("sleepingPopUp");
+                keyPress = "";
             }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
