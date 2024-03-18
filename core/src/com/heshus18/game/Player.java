@@ -250,7 +250,7 @@ public class Player {
         TiledMap map = GameScreen.background;
         MapLayer buildingsAndBounds = map.getLayers().get("Object Layer 1");
         MapObjects buildingsAndBoundsObjects = buildingsAndBounds.getObjects();
-        String[] objNames = {"Goodricke Hub", "CS Building"};
+        String[] objNames = {"Goodricke Hub", "CS Building", "Ron Cooke", "Water1", "Water2", "Water3", "Water4", "Water5", "Water6", "Piazza", "Glasshouse", "Building1", "Building2", "Building3", "Building4", "Building5a", "Building5b", "Building5c", "Building6", "Building7", "Building8a", "Building8b", "Building9a", "Building9b", "Building10", "Building11", "Building12", "Building13", "Building14", "Building15", "Building16", "Building17", "Building18"};
         for(String i : objNames){
             MapObject current = buildingsAndBoundsObjects.get(i);
             RectangleMapObject rectangleMapObject = (RectangleMapObject) current;
