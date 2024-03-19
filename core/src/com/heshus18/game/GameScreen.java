@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
@@ -16,7 +17,7 @@ import java.util.Objects;
 
 public class GameScreen implements Screen {
     final HesHustle game;
-    SpriteBatch batch;
+    static SpriteBatch batch;
     Player player;
     Texture spriteSheet;
     OrthographicCamera camera;
@@ -34,6 +35,9 @@ public class GameScreen implements Screen {
     PopUpManager popUpManager;
     Score score = Score.getInstance();
 
+    //Font for interact popups
+    static BitmapFont font;
+
     public GameScreen(final HesHustle game, String spriteChoice) {
         this.game = game;
 
@@ -44,8 +48,8 @@ public class GameScreen implements Screen {
 
         //rendering character and background model
         spriteSheet = new Texture(Gdx.files.internal(spriteChoice));
-        player = new Player(spriteSheet);
         background = new TmxMapLoader().load("tileMap.tmx");
+        player = new Player(spriteSheet);
         unitScale = 2f; //change this value for size?
         renderer = new OrthogonalTiledMapRenderer(background, unitScale);
 
@@ -60,6 +64,10 @@ public class GameScreen implements Screen {
         gameTime = new Time();
         clockHUD = new Clock(new Vector2(800 - 100, 480 - 20f), gameTime);
 
+        //Creating interact pop-up font
+        font = new BitmapFont();
+        font.getData().setScale(1.5f);
+
         popUpManager = new PopUpManager();
 
         PopUp studyPopUp = new PopUp("studyPopUp", "Are you sure you want to start studying?\n\nEnergy " +
@@ -72,7 +80,7 @@ public class GameScreen implements Screen {
                 } else {
                     gameTime.addTime(120);
                     score.incrementTimeStudy();
-                    popUpManager.showPopUp("studySucess");
+                    popUpManager.showPopUp("studySuccess");
                 }
             }
         });
@@ -88,7 +96,7 @@ public class GameScreen implements Screen {
                 } else {
                     gameTime.addTime(60);
                     score.incrementTimeAte();
-                    popUpManager.showPopUp("eatingSucess");
+                    popUpManager.showPopUp("eatingSuccess");
                 }
             }
         });
@@ -105,7 +113,7 @@ public class GameScreen implements Screen {
                 } else {
                     gameTime.addTime(120);
                     score.incrementTimeActivity();
-                    popUpManager.showPopUp("activitySucess");
+                    popUpManager.showPopUp("activitySuccess");
                 }
             }
         });
@@ -151,17 +159,17 @@ public class GameScreen implements Screen {
                 " later.", 200, 170, 400, 170, hudCamera, "warning");
         popUpManager.addPopUp(cantSleepPopUp);
 
-        PopUp eatingSucess = new PopUp("eatingSucess", "You've finished eating!", 0, 0, 800,
+        PopUp eatingSucess = new PopUp("eatingSuccess", "You've finished eating!", 0, 0, 800,
                 480, hudCamera, "info");
         popUpManager.addPopUp(eatingSucess);
 
-        PopUp studySucess = new PopUp("studySucess", "You've finished studying!", 0, 0, 800,
+        PopUp studySucess = new PopUp("studySuccess", "You've finished studying!", 0, 0, 800,
                 480, hudCamera, "info");
         popUpManager.addPopUp(studySucess);
 
-        PopUp activitySucess = new PopUp("activitySucess", "You've finished a recreational activity!",
+        PopUp activitySuccess = new PopUp("activitySuccess", "You've finished a recreational activity!",
                 0, 0, 800, 480, hudCamera, "info");
-        popUpManager.addPopUp(activitySucess);
+        popUpManager.addPopUp(activitySuccess);
 
         String message = "You went to bed! It's now " + gameTime.getDayName(gameTime.getDay()) + ".";
         PopUp nextDay = new PopUp("nextDay", message, 0, 0, 800, 480, hudCamera, "info");
@@ -201,6 +209,12 @@ public class GameScreen implements Screen {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             popUpManager.declineVisiblePopUp();
         }
+    }
+
+    public static void interact(){
+        batch.begin();
+        font.draw(batch, "E to interact", 10, 32);
+        batch.end();
     }
 
     @Override

@@ -1,9 +1,11 @@
 package com.heshus18.game;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.MapLayer;
@@ -34,15 +36,25 @@ public class Player {
     Animation<TextureRegion> backWalk;
 
     //Array containing all frames of each animation
-    TextureRegion [] leftIdleFrames, rightIdleFrames, backIdleFrames, leftWalkFrames, rightWalkFrames, backWalkFrames;
+    TextureRegion[] leftIdleFrames, rightIdleFrames, backIdleFrames, leftWalkFrames, rightWalkFrames, backWalkFrames;
 
     TextureRegion currentFrame;
-    Animation [] animations;
+    Animation[] animations;
 
     //Movement boolean variables
     boolean leftMove, rightMove, upMove, downMove;
     //player hit box
     Rectangle player;
+    float interactSize;
+
+
+    //Map variables
+    boolean collisionX, collisionY;
+    TiledMap map;
+    MapLayer buildingsAndBounds;
+    MapObjects buildingsAndBoundsObjects;
+    String currentBuilding;
+    float scaley;
 
     /**
      * Creates an instance of player.
@@ -50,7 +62,7 @@ public class Player {
      *
      * @param spriteSheet The sheet with all player animations
      */
-    public Player(Texture spriteSheet){
+    public Player(Texture spriteSheet) {
         //Define number of items in spriteSheet, and assign integer values to each separate animation
         COLS = 4;
         ROWS = 6;
@@ -71,38 +83,38 @@ public class Player {
         leftIdleFrames = new TextureRegion[COLS];
         System.arraycopy(tmp[LEFTIDLE], 0, leftIdleFrames, 0, COLS);
         //Create instance of Animation using the array of animation frames, with a frame period of 150ms
-        leftIdle = new Animation(0.15f, (Object[])leftIdleFrames);
+        leftIdle = new Animation(0.15f, (Object[]) leftIdleFrames);
         leftIdle.setPlayMode(Animation.PlayMode.LOOP);
 
         //Repeat for all animations
         //rightIdle animation
         rightIdleFrames = new TextureRegion[COLS];
         System.arraycopy(tmp[RIGHTIDLE], 0, rightIdleFrames, 0, COLS);
-        rightIdle = new Animation(0.15f, (Object[])rightIdleFrames);
+        rightIdle = new Animation(0.15f, (Object[]) rightIdleFrames);
         rightIdle.setPlayMode(Animation.PlayMode.LOOP);
 
         //backIdle animation
         backIdleFrames = new TextureRegion[COLS];
         System.arraycopy(tmp[BACKIDLE], 0, backIdleFrames, 0, COLS);
-        backIdle = new Animation(0.15f, (Object[])backIdleFrames);
+        backIdle = new Animation(0.15f, (Object[]) backIdleFrames);
         backIdle.setPlayMode(Animation.PlayMode.LOOP);
 
         //leftWalk animation
         leftWalkFrames = new TextureRegion[COLS];
         System.arraycopy(tmp[LEFTWALK], 0, leftWalkFrames, 0, COLS);
-        leftWalk = new Animation(0.15f, (Object[])leftWalkFrames);
+        leftWalk = new Animation(0.15f, (Object[]) leftWalkFrames);
         leftWalk.setPlayMode(Animation.PlayMode.LOOP);
 
         //rightWalk animation
         rightWalkFrames = new TextureRegion[COLS];
         System.arraycopy(tmp[RIGHTWALK], 0, rightWalkFrames, 0, COLS);
-        rightWalk = new Animation(0.15f, (Object[])rightWalkFrames);
+        rightWalk = new Animation(0.15f, (Object[]) rightWalkFrames);
         rightWalk.setPlayMode(Animation.PlayMode.LOOP);
 
         //backWalk animation
         backWalkFrames = new TextureRegion[COLS];
         System.arraycopy(tmp[BACKWALK], 0, backWalkFrames, 0, COLS);
-        backWalk = new Animation(0.15f, (Object[])backWalkFrames);
+        backWalk = new Animation(0.15f, (Object[]) backWalkFrames);
         backWalk.setPlayMode(Animation.PlayMode.LOOP);
 
         //Put animations in animation array
@@ -130,49 +142,71 @@ public class Player {
         player.width = 31;
         player.height = 88;
 
+        //Collision variables
+        interactSize = 5;
+        collisionX = false;
+        collisionY = false;
+
+        //Building the map layers/objects
+        map = GameScreen.background;
+        buildingsAndBounds = map.getLayers().get("Object Layer 1");
+        buildingsAndBoundsObjects = buildingsAndBounds.getObjects();
     }
 
     /**
      * Set the current player animation
+     *
      * @param currentAnimation The animation to be set
      */
-    public void setCurrentAnimation(int currentAnimation){
+    public void setCurrentAnimation(int currentAnimation) {
         this.currentAnimation = currentAnimation;
         stateTime = 0;
     }
 
     /**
-     *
      * @return current player animation
      */
-    public int getCurrentAnimation() {return currentAnimation;}
+    public int getCurrentAnimation() {
+        return currentAnimation;
+    }
 
     /**
-     *
      * @return player's x coordinate
      */
-    public float getX() {return player.getX();}
-    public float getY() {return player.getY();}
-    public float getWidth() {return player.getWidth();}
-    public float getHeight() {return player.getHeight();}
+    public float getX() {
+        return player.getX();
+    }
+
+    public float getY() {
+        return player.getY();
+    }
+
+    public float getWidth() {
+        return player.getWidth();
+    }
+
+    public float getHeight() {
+        return player.getHeight();
+    }
 
     /**
      * Updates the sprite batch with a drawing of the current animation frame
-     * @param batch The sprite being used to render GameScreen
+     *
+     * @param batch   The sprite being used to render GameScreen
      * @param playerX the player's x coordinate
      * @param playerY the player's y coordinate
      */
-    public void update(SpriteBatch batch, float playerX, float playerY){
+    public void update(SpriteBatch batch, float playerX, float playerY) {
         stateTime += Gdx.graphics.getDeltaTime();
 
         currentFrame = (TextureRegion) animations[currentAnimation].getKeyFrame(stateTime, true);
 
         batch.begin();
-        batch.draw(currentFrame, playerX -47, playerY, 128, 128);
+        batch.draw(currentFrame, playerX - 47, playerY, 128, 128);
         batch.end();
     }
 
-    public void move(PopUpManager popUpManager){
+    public void move(PopUpManager popUpManager) {
         float deltaX = 200 * Gdx.graphics.getDeltaTime();
         float deltaY = 200 * Gdx.graphics.getDeltaTime();
 
@@ -182,7 +216,7 @@ public class Player {
 
         //Performing character movement and changing current animation to reflect direction
         //Up move
-        if (Gdx.input.isKeyPressed(Input.Keys.W)){
+        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             if (this.getCurrentAnimation() != BACKWALK)
                 this.setCurrentAnimation(BACKWALK);
             upMove = true;
@@ -198,7 +232,7 @@ public class Player {
         } else leftMove = false;
         //Right move
         //If also moving up, don't overwrite up animation
-        if (Gdx.input.isKeyPressed(Input.Keys.D)){
+        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             if (this.getCurrentAnimation() != RIGHTWALK && !upMove)
                 this.setCurrentAnimation(RIGHTWALK);
             rightMove = true;
@@ -206,74 +240,70 @@ public class Player {
         } else rightMove = false;
         //Down move
         //If current animation is leftWalk or rightWalk, use that animation, else switch to leftWalk
-        if (Gdx.input.isKeyPressed(Input.Keys.S)){
-            if(this.getCurrentAnimation() != LEFTWALK &&
-                    this.getCurrentAnimation() != RIGHTWALK )
+        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+            if (this.getCurrentAnimation() != LEFTWALK &&
+                    this.getCurrentAnimation() != RIGHTWALK)
                 this.setCurrentAnimation(LEFTWALK);
             downMove = true;
             potentialY -= deltaY;
         } else downMove = false;
 
         //Set idle animations based off previous direction
-        if (!leftMove && !rightMove && !upMove && !downMove){
-            if(this.getCurrentAnimation() == LEFTWALK)
+        if (!leftMove && !rightMove && !upMove && !downMove) {
+            if (this.getCurrentAnimation() == LEFTWALK)
                 this.setCurrentAnimation(LEFTIDLE);
-            else if(this.getCurrentAnimation() == RIGHTWALK)
+            else if (this.getCurrentAnimation() == RIGHTWALK)
                 this.setCurrentAnimation(RIGHTIDLE);
-            else if(this.getCurrentAnimation() == BACKWALK)
+            else if (this.getCurrentAnimation() == BACKWALK)
                 this.setCurrentAnimation(BACKIDLE);
         }
 
-        float scaley = GameScreen.unitScale;
-        float interactSize = 5;
-        Rectangle playerHitbox = new Rectangle((player.x - interactSize) / 2, (player.y - interactSize) / 2,
+        //Create player hit boxes
+        scaley = GameScreen.unitScale;
+        Rectangle playerHitBox = new Rectangle((player.x - interactSize) / 2, (player.y - interactSize) / 2,
                 player.width + interactSize, player.height + interactSize);
-        Rectangle potentialPlayerXScaled = new Rectangle(potentialX / scaley, player.y / scaley,
-                player.width / scaley, player.height / scaley);
-        Rectangle potentialPlayerYScaled = new Rectangle(player.x / scaley, potentialY / scaley,
-                player.width / scaley, player.height / scaley);
+        Rectangle potentialPlayerXScaled = new Rectangle(potentialX / scaley, player.y / scaley - 8,
+                player.width / scaley, player.height / scaley + 16);
+        Rectangle potentialPlayerYScaled = new Rectangle(player.x / scaley - 8, potentialY / scaley,
+                player.width / scaley + 16, player.height / scaley);
 
-            // This is the building collision checks, check for either X, Y or both axis are colliding
-        boolean collisionX = false, collisionY = false;
-        TiledMap map = GameScreen.background;
-        MapLayer buildingsAndBounds = map.getLayers().get("Object Layer 1");
-        MapObjects buildingsAndBoundsObjects = buildingsAndBounds.getObjects();
-        String[] objNames = {"Wall1", "Wall2", "Wall3", "Wall4", "Goodricke Hub", "CS Building", "Ron Cooke",
-                "Water1", "Water2", "Water3", "Water4", "Water5", "Water6", "Piazza", "Glasshouse", "Building1",
-                "Building2", "Building3", "Building4", "Building5a", "Building5b", "Building5c", "Building6",
-                "Building7", "Building8a", "Building8b", "Building9a", "Building9b", "Building10", "Building11",
-                "Building12", "Building13", "Building14", "Building15", "Building16", "Building17", "Building18"};
-        for(String i : objNames){
-            MapObject current = buildingsAndBoundsObjects.get(i);
-            RectangleMapObject rectangleMapObject = (RectangleMapObject) current;
-            Rectangle rectangle = rectangleMapObject.getRectangle();
+        for (MapObject building : buildingsAndBoundsObjects) {
+            Rectangle buildingBox = ((RectangleMapObject) building).getRectangle();
+            String popUpCurrent = "";
 
-            if((potentialPlayerXScaled).overlaps(rectangle)){
-                collisionX = true;
-            }
-            if(potentialPlayerYScaled.overlaps(rectangle)){
-                collisionY = true;
-            }
-            if (collisionX && collisionY) break;
+            collisionX = (potentialPlayerXScaled).overlaps(buildingBox);
+            collisionY = (potentialPlayerYScaled).overlaps(buildingBox);
 
-            if(playerHitbox.overlaps(rectangle)){
-                if(Gdx.input.isKeyJustPressed(Input.Keys.F)){
-                    if(i.equals("CS Building")) {popUpManager.showPopUp("studyPopUp");}
-                    if(i.equals("Piazza")) {popUpManager.showPopUp("eatingPopUp");}
-                    if(i.equals("Water1") || i.equals("Water2") || i.equals("Water3") || i.equals("Water4") ||
-                            i.equals("Water5") || i.equals("Water6")) {popUpManager.showPopUp("activityPopUp");}
-                    if(i.equals("Goodricke Hub")) {popUpManager.showPopUp("sleepingPopUp");}
+            if (playerHitBox.overlaps(buildingBox)) {
+                if (building.getName().equals("CS Building")) {
+                    GameScreen.interact();
+                    popUpCurrent = "studyPopUp";
+                }
+                if (building.getName().equals("Piazza")) {
+                    GameScreen.interact();
+                    popUpCurrent = "eatingPopUp";
+                }
+                if (building.getName().equals("Water1") || building.getName().equals("Water2") ||
+                        building.getName().equals("Water3") || building.getName().equals("Water4")
+                        || building.getName().equals("Water5") || building.getName().equals("Water6")) {
+                    GameScreen.interact();
+                    popUpCurrent = "activityPopUp";
+                }
+                if (building.getName().equals("Goodricke Hub")) {
+                    GameScreen.interact();
+                    popUpCurrent = "sleepingPopUp";
+                }
+                if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+                    if (!popUpCurrent.isEmpty()) {
+                        popUpManager.showPopUp(popUpCurrent);
+                    }
                 }
             }
+            if (collisionX && collisionY) break;
         }
 
-            // Allow character to move if no collision
-            if (!collisionX) {
-                player.x = potentialX;
-            }
-
-            if (!collisionY) {
-                player.y = potentialY;
-            }
-        }
+        // Allow character to move if no collision
+        if (!collisionX) player.x = potentialX;
+        if (!collisionY) player.y = potentialY;
+    }
 }
