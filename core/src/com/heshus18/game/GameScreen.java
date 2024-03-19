@@ -18,8 +18,7 @@ public class GameScreen implements Screen {
     final HesHustle game;
     SpriteBatch batch;
     Player player;
-    Texture spriteSheet, playableMap;
-    Array<Building> buildings;
+    Texture spriteSheet;
     OrthographicCamera camera;
     public static TiledMap background;
     public static float unitScale;
@@ -40,24 +39,15 @@ public class GameScreen implements Screen {
 
         // Use the game's batch for drawing
         batch = game.batch;
-
-        buildings = new Array<Building>();
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
 
         //rendering character and background model
         spriteSheet = new Texture(Gdx.files.internal(spriteChoice));
         player = new Player(spriteSheet);
-        playableMap = new Texture(Gdx.files.internal("checkerboard.png"));
         background = new TmxMapLoader().load("tileMap.tmx");
         unitScale = 2f; //change this value for size?
         renderer = new OrthogonalTiledMapRenderer(background, unitScale);
-
-
-        // Building textures
-        Texture buildingTexture1 = new Texture(Gdx.files.internal("building.png"));
-        Texture buildingTexture2 = new Texture(Gdx.files.internal("building2.png"));
-        Texture buildingTexture3 = new Texture(Gdx.files.internal("building3.png"));
 
         //creating a camera for the HUDs
         hudCamera = new OrthographicCamera();
@@ -70,97 +60,107 @@ public class GameScreen implements Screen {
         gameTime = new Time();
         clockHUD = new Clock(new Vector2(800 - 100, 480 - 20f), gameTime);
 
-        mapWidth = playableMap.getWidth();
-        mapHeight = playableMap.getHeight();
-
-        // Adding building to the map
-        // Add more building by just copy-pasting these and assigning the texture
-        buildings.add(new Building(100, 100, 120, 80, buildingTexture1));
-        buildings.add(new Building(30, -150, 150, 80, buildingTexture2));
-        buildings.add(new Building(330, 150, 150, 80, buildingTexture3));
-
         popUpManager = new PopUpManager();
 
-        PopUp studyPopUp = new PopUp("studyPopUp", "Are you sure you want to start studying?\n\nEnergy drain: 20%\nDuration: 2 Hours", 200, 170, 400, 170, hudCamera, "prompt");
-        studyPopUp.addConfirmAction(() -> {
-            if (!energyBar.drainEnergy(20f)) {
-                popUpManager.showPopUp("noEnergyPopUp");
-            }
-            else {
-                gameTime.addTime(120);
-                score.incrementTimeStudy();
-                popUpManager.showPopUp("studySucess");
+        PopUp studyPopUp = new PopUp("studyPopUp", "Are you sure you want to start studying?\n\nEnergy " +
+                "drain: 20%\nDuration: 2 Hours", 200, 170, 400, 170, hudCamera, "prompt");
+        studyPopUp.addConfirmAction(new Runnable() {
+            @Override
+            public void run() {
+                if (!energyBar.drainEnergy(20f)) {
+                    popUpManager.showPopUp("noEnergyPopUp");
+                } else {
+                    gameTime.addTime(120);
+                    score.incrementTimeStudy();
+                    popUpManager.showPopUp("studySucess");
+                }
             }
         });
         popUpManager.addPopUp(studyPopUp);
 
-        PopUp eatingPopUp = new PopUp("eatingPopUp", "Are you sure you want to start eating?\n\nEnergy drain: 10%\nDuration: 1 Hour", 200, 170, 400, 170, hudCamera, "prompt");
-        eatingPopUp.addConfirmAction(() -> {
-            if (!energyBar.drainEnergy(10f)) {
-                popUpManager.showPopUp("noEnergyPopUp");
-            }
-            else {
-                gameTime.addTime(60);
-                score.incrementTimeAte();
-                popUpManager.showPopUp("eatingSucess");
+        PopUp eatingPopUp = new PopUp("eatingPopUp", "Are you sure you want to start eating?\n\nEnergy " +
+                "drain: 10%\nDuration: 1 Hour", 200, 170, 400, 170, hudCamera, "prompt");
+        eatingPopUp.addConfirmAction(new Runnable() {
+            @Override
+            public void run() {
+                if (!energyBar.drainEnergy(10f)) {
+                    popUpManager.showPopUp("noEnergyPopUp");
+                } else {
+                    gameTime.addTime(60);
+                    score.incrementTimeAte();
+                    popUpManager.showPopUp("eatingSucess");
+                }
             }
         });
         popUpManager.addPopUp(eatingPopUp);
 
-        PopUp activityPopUp = new PopUp("activityPopUp", "Are you sure you want to start this activity?\n\nEnergy drain: 15%\nDuration: 2 Hours", 200, 170, 400, 170, hudCamera, "prompt");
-        activityPopUp.addConfirmAction(() -> {
-            if (!energyBar.drainEnergy(15f)) {
-                popUpManager.showPopUp("noEnergyPopUp");
-            }
-            else {
-                gameTime.addTime(120);
-                score.incrementTimeActivity();
-                popUpManager.showPopUp("activitySucess");
+        PopUp activityPopUp = new PopUp("activityPopUp", "Are you sure you want to start this " +
+                "activity?\n\nEnergy drain: 15%\nDuration: 2 Hours", 200, 170, 400, 170,
+                hudCamera, "prompt");
+        activityPopUp.addConfirmAction(new Runnable() {
+            @Override
+            public void run() {
+                if (!energyBar.drainEnergy(15f)) {
+                    popUpManager.showPopUp("noEnergyPopUp");
+                } else {
+                    gameTime.addTime(120);
+                    score.incrementTimeActivity();
+                    popUpManager.showPopUp("activitySucess");
+                }
             }
         });
         popUpManager.addPopUp(activityPopUp);
 
-        PopUp sleepingPopUp = new PopUp("sleepingPopUp", "Are you sure you want to go to bed?\n\nYou will advance to the next day.", 200, 170, 400, 170, hudCamera, "prompt");
-        sleepingPopUp.addConfirmAction(() -> {
-            int currentHour = gameTime.getHour();
-            int currentDay = gameTime.getDay();
+        PopUp sleepingPopUp = new PopUp("sleepingPopUp", "Are you sure you want to go to bed?\n\nYou " +
+                "will advance to the next day.", 200, 170, 400, 170, hudCamera, "prompt");
+        sleepingPopUp.addConfirmAction(new Runnable() {
+            @Override
+            public void run() {
+                int currentHour = gameTime.getHour();
+                int currentDay = gameTime.getDay();
 
-            if (currentHour < 18) {
-                popUpManager.showPopUp("cantSleepPopUp");
-            } else {
-                if (currentDay == 7) {
-                    score.incrementTimeSlept();
-                    game.setScreen(new GameOverScreen(game));
+                if (currentHour < 18) {
+                    popUpManager.showPopUp("cantSleepPopUp");
                 } else {
-                    gameTime.nextDay();
-                    score.incrementTimeSlept();
-                    if (currentHour >= 18 && currentHour <= 22) {
-                        energyBar.addEnergy(100f);
+                    if (currentDay == 7) {
+                        score.incrementTimeSlept();
+                        game.setScreen(new GameOverScreen(game));
                     } else {
-                        energyBar.addEnergy(50f);
+                        gameTime.nextDay();
+                        score.incrementTimeSlept();
+                        if (currentHour >= 18 && currentHour <= 22) {
+                            energyBar.addEnergy(100f);
+                        } else {
+                            energyBar.addEnergy(50f);
+                        }
+                        String newMessage = "You went to bed! It's now " + gameTime.getDayName(gameTime.getDay()) + ".";
+                        popUpManager.updateMessage("nextDay", newMessage);
+                        popUpManager.showPopUp("nextDay");
                     }
-                    String newMessage = "You went to bed! It's now " + gameTime.getDayName(gameTime.getDay()) + ".";
-                    popUpManager.updateMessage("nextDay", newMessage);
-                    popUpManager.showPopUp("nextDay");
                 }
             }
         });
         popUpManager.addPopUp(sleepingPopUp);
 
 
-        PopUp noEnergyPopUp = new PopUp("noEnergyPopUp", "Uh oh! You don't have enough energy!\n\nTime to head to bed.", 200, 170, 400, 170, hudCamera, "warning");
+        PopUp noEnergyPopUp = new PopUp("noEnergyPopUp", "Uh oh! You don't have enough energy!\n\nTime " +
+                "to head to bed.", 200, 170, 400, 170, hudCamera, "warning");
         popUpManager.addPopUp(noEnergyPopUp);
 
-        PopUp cantSleepPopUp = new PopUp("cantSleepPopUp", "It is too early to go to bed!\n\nCome back later.", 200, 170, 400, 170, hudCamera, "warning");
+        PopUp cantSleepPopUp = new PopUp("cantSleepPopUp", "It is too early to go to bed!\n\nCome back" +
+                " later.", 200, 170, 400, 170, hudCamera, "warning");
         popUpManager.addPopUp(cantSleepPopUp);
 
-        PopUp eatingSucess = new PopUp("eatingSucess", "You've finished eating!", 0, 0, 800, 480, hudCamera, "info");
+        PopUp eatingSucess = new PopUp("eatingSucess", "You've finished eating!", 0, 0, 800,
+                480, hudCamera, "info");
         popUpManager.addPopUp(eatingSucess);
 
-        PopUp studySucess = new PopUp("studySucess", "You've finished studying!", 0, 0, 800, 480, hudCamera, "info");
+        PopUp studySucess = new PopUp("studySucess", "You've finished studying!", 0, 0, 800,
+                480, hudCamera, "info");
         popUpManager.addPopUp(studySucess);
 
-        PopUp activitySucess = new PopUp("activitySucess", "You've finished a recreational activity!", 0, 0, 800, 480, hudCamera, "info");
+        PopUp activitySucess = new PopUp("activitySucess", "You've finished a recreational activity!",
+                0, 0, 800, 480, hudCamera, "info");
         popUpManager.addPopUp(activitySucess);
 
         String message = "You went to bed! It's now " + gameTime.getDayName(gameTime.getDay()) + ".";
@@ -180,14 +180,6 @@ public class GameScreen implements Screen {
         ScreenUtils.clear(0.3765f, 0.4588f, 0.5882f, 1);
         batch.setProjectionMatrix(camera.combined);
 
-        batch.begin();
-        //batch.draw(playableMap, -(playableMap.getWidth()/2), -(playableMap.getHeight()/2));
-
-        // Drawing the buildings
-        for(Building building : buildings) {
-            batch.draw(building.texture, building.bounds.x, building.bounds.y, building.bounds.width, building.bounds.height);
-        }
-        batch.end();
         renderer.setView(camera);
         renderer.render();
 
@@ -204,28 +196,7 @@ public class GameScreen implements Screen {
         popUpManager.render(batch);
         batch.end();
 
-        if (!popUpManager.isAnyPopUpVisible()) {player.move(buildings, mapWidth, mapHeight);}
-
-            //Remove later, keybindings for testing only
-            if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
-                gameTime.nextDay();
-            }
-            if (keyPress.equals("F")) {
-                popUpManager.showPopUp("studyPopUp");
-                keyPress = "";
-            }
-            if (keyPress.equals("G")) {
-                popUpManager.showPopUp("eatingPopUp");
-                keyPress = "";
-            }
-            if (keyPress.equals("H")) {
-                popUpManager.showPopUp("activityPopUp");
-                keyPress = "";
-            }
-            if (keyPress.equals("J")) {
-                popUpManager.showPopUp("sleepingPopUp");
-                keyPress = "";
-            }
+        if (!popUpManager.isAnyPopUpVisible()) {player.move(popUpManager);}
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             popUpManager.declineVisiblePopUp();
@@ -244,7 +215,6 @@ public class GameScreen implements Screen {
     public void dispose () {
         batch.dispose();
         spriteSheet.dispose();
-        playableMap.dispose();
         energyBar.dispose();
         clockHUD.dispose();
         popUpManager.dispose();

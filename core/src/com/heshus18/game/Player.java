@@ -26,7 +26,12 @@ public class Player {
     private float stateTime;
 
     //Animation classes for each animation
-    Animation<TextureRegion> leftIdle, rightIdle, backIdle, leftWalk, rightWalk, backWalk;
+    Animation leftIdle;
+    Animation<TextureRegion> rightIdle;
+    Animation<TextureRegion> backIdle;
+    Animation<TextureRegion> leftWalk;
+    Animation<TextureRegion> rightWalk;
+    Animation<TextureRegion> backWalk;
 
     //Array containing all frames of each animation
     TextureRegion [] leftIdleFrames, rightIdleFrames, backIdleFrames, leftWalkFrames, rightWalkFrames, backWalkFrames;
@@ -64,52 +69,40 @@ public class Player {
         //leftIdle animation
         //For row LEFTIDLE of spriteSheet, create 1D array containing all images (frames) in that row
         leftIdleFrames = new TextureRegion[COLS];
-        for(int i=0; i < COLS; i++) {
-            leftIdleFrames[i] = tmp[LEFTIDLE][i];
-        }
+        System.arraycopy(tmp[LEFTIDLE], 0, leftIdleFrames, 0, COLS);
         //Create instance of Animation using the array of animation frames, with a frame period of 150ms
-        leftIdle = new Animation(0.15f, leftIdleFrames);
+        leftIdle = new Animation(0.15f, (Object[])leftIdleFrames);
         leftIdle.setPlayMode(Animation.PlayMode.LOOP);
 
         //Repeat for all animations
         //rightIdle animation
         rightIdleFrames = new TextureRegion[COLS];
-        for(int i=0; i < COLS; i++) {
-            rightIdleFrames[i] = tmp[RIGHTIDLE][i];
-        }
-        rightIdle = new Animation(0.15f, rightIdleFrames);
+        System.arraycopy(tmp[RIGHTIDLE], 0, rightIdleFrames, 0, COLS);
+        rightIdle = new Animation(0.15f, (Object[])rightIdleFrames);
         rightIdle.setPlayMode(Animation.PlayMode.LOOP);
 
         //backIdle animation
         backIdleFrames = new TextureRegion[COLS];
-        for(int i=0; i < COLS; i++) {
-                backIdleFrames[i] = tmp[BACKIDLE][i];
-        }
-        backIdle = new Animation(0.15f, backIdleFrames);
+        System.arraycopy(tmp[BACKIDLE], 0, backIdleFrames, 0, COLS);
+        backIdle = new Animation(0.15f, (Object[])backIdleFrames);
         backIdle.setPlayMode(Animation.PlayMode.LOOP);
 
         //leftWalk animation
         leftWalkFrames = new TextureRegion[COLS];
-        for(int i=0; i < COLS; i++) {
-            leftWalkFrames[i] = tmp[LEFTWALK][i];
-        }
-        leftWalk = new Animation(0.15f, leftWalkFrames);
+        System.arraycopy(tmp[LEFTWALK], 0, leftWalkFrames, 0, COLS);
+        leftWalk = new Animation(0.15f, (Object[])leftWalkFrames);
         leftWalk.setPlayMode(Animation.PlayMode.LOOP);
 
         //rightWalk animation
         rightWalkFrames = new TextureRegion[COLS];
-        for(int i=0; i < COLS; i++) {
-            rightWalkFrames[i] = tmp[RIGHTWALK][i];
-        }
-        rightWalk = new Animation(0.15f, rightWalkFrames);
+        System.arraycopy(tmp[RIGHTWALK], 0, rightWalkFrames, 0, COLS);
+        rightWalk = new Animation(0.15f, (Object[])rightWalkFrames);
         rightWalk.setPlayMode(Animation.PlayMode.LOOP);
 
         //backWalk animation
         backWalkFrames = new TextureRegion[COLS];
-        for(int i=0; i < COLS; i++) {
-            backWalkFrames[i] = tmp[BACKWALK][i];
-        }
-        backWalk = new Animation(0.15f, backWalkFrames);
+        System.arraycopy(tmp[BACKWALK], 0, backWalkFrames, 0, COLS);
+        backWalk = new Animation(0.15f, (Object[])backWalkFrames);
         backWalk.setPlayMode(Animation.PlayMode.LOOP);
 
         //Put animations in animation array
@@ -132,8 +125,8 @@ public class Player {
 
         //create player hit box
         player = new Rectangle();
-        player.x = 800 / 2 - 36 / 2;
-        player.y = 24;
+        player.x = 1600;
+        player.y = 1100;
         player.width = 31;
         player.height = 88;
 
@@ -179,19 +172,13 @@ public class Player {
         batch.end();
     }
 
-    public void move(Array<Building> buildings, float mapWidth, float mapHeight){
+    public void move(PopUpManager popUpManager){
         float deltaX = 200 * Gdx.graphics.getDeltaTime();
         float deltaY = 200 * Gdx.graphics.getDeltaTime();
 
         //an array representing potential [potentialX, potentialY]
         float potentialX = player.x + (Gdx.input.isKeyPressed(Input.Keys.D) ? deltaX : 0) - (Gdx.input.isKeyPressed(Input.Keys.A) ? deltaX : 0);
         float potentialY = player.y + (Gdx.input.isKeyPressed(Input.Keys.W) ? deltaY : 0) - (Gdx.input.isKeyPressed(Input.Keys.S) ? deltaY : 0);
-
-        // Setting the map boundaries position
-        //float minX = -(mapWidth / 2); // Left edge of the map
-        //float maxX = (mapWidth / 2) - player.width; // Right edge of the map
-        //float minY = -(mapHeight / 2); // Bottom edge of the map
-        //float maxY = (mapHeight / 2) - player.height; // Top edge of the map
 
         //Performing character movement and changing current animation to reflect direction
         //Up move
@@ -239,24 +226,28 @@ public class Player {
 
         float scaley = GameScreen.unitScale;
         float interactSize = 5;
-        Rectangle playerHitbox = new Rectangle((player.x - interactSize) / 2, (player.y - interactSize) / 2, player.width + interactSize, player.height + interactSize);
-        Rectangle potentialPlayerXScaled = new Rectangle(potentialX / scaley, player.y / scaley, player.width / scaley, player.height / scaley);
-        Rectangle potentialPlayerYScaled = new Rectangle(player.x / scaley, potentialY / scaley, player.width / scaley, player.height / scaley);
+        Rectangle playerHitbox = new Rectangle((player.x - interactSize) / 2, (player.y - interactSize) / 2,
+                player.width + interactSize, player.height + interactSize);
+        Rectangle potentialPlayerXScaled = new Rectangle(potentialX / scaley, player.y / scaley,
+                player.width / scaley, player.height / scaley);
+        Rectangle potentialPlayerYScaled = new Rectangle(player.x / scaley, potentialY / scaley,
+                player.width / scaley, player.height / scaley);
 
             // This is the building collision checks, check for either X, Y or both axis are colliding
         boolean collisionX = false, collisionY = false;
         TiledMap map = GameScreen.background;
         MapLayer buildingsAndBounds = map.getLayers().get("Object Layer 1");
         MapObjects buildingsAndBoundsObjects = buildingsAndBounds.getObjects();
-        String[] objNames = {"Wall1", "Wall2", "Wall3", "Wall4", "Goodricke Hub", "CS Building", "Ron Cooke", "Water1", "Water2", "Water3", "Water4", "Water5", "Water6", "Piazza", "Glasshouse", "Building1", "Building2", "Building3", "Building4", "Building5a", "Building5b", "Building5c", "Building6", "Building7", "Building8a", "Building8b", "Building9a", "Building9b", "Building10", "Building11", "Building12", "Building13", "Building14", "Building15", "Building16", "Building17", "Building18"};
+        String[] objNames = {"Wall1", "Wall2", "Wall3", "Wall4", "Goodricke Hub", "CS Building", "Ron Cooke",
+                "Water1", "Water2", "Water3", "Water4", "Water5", "Water6", "Piazza", "Glasshouse", "Building1",
+                "Building2", "Building3", "Building4", "Building5a", "Building5b", "Building5c", "Building6",
+                "Building7", "Building8a", "Building8b", "Building9a", "Building9b", "Building10", "Building11",
+                "Building12", "Building13", "Building14", "Building15", "Building16", "Building17", "Building18"};
         for(String i : objNames){
             MapObject current = buildingsAndBoundsObjects.get(i);
             RectangleMapObject rectangleMapObject = (RectangleMapObject) current;
             Rectangle rectangle = rectangleMapObject.getRectangle();
-            //float x = rectangle.getX();
-            //float y = rectangle.getY();
-            //float width = rectangle.getWidth();
-            //float height = rectangle.getHeight();
+
             if((potentialPlayerXScaled).overlaps(rectangle)){
                 collisionX = true;
             }
@@ -267,18 +258,11 @@ public class Player {
 
             if(playerHitbox.overlaps(rectangle)){
                 if(Gdx.input.isKeyJustPressed(Input.Keys.F)){
-                    if(i.equals("Ron Cooke")){
-                        GameScreen.keyPress = "F";
-                    }
-                    if(i.equals("Piazza")){
-                        GameScreen.keyPress = "G";
-                    }
-                    if(i.equals("Goodricke Hub")){
-                        GameScreen.keyPress = "H";
-                    }
-                    if(i.equals("Building1")){
-                        GameScreen.keyPress = "J";
-                    }
+                    if(i.equals("CS Building")) {popUpManager.showPopUp("studyPopUp");}
+                    if(i.equals("Piazza")) {popUpManager.showPopUp("eatingPopUp");}
+                    if(i.equals("Water1") || i.equals("Water2") || i.equals("Water3") || i.equals("Water4") ||
+                            i.equals("Water5") || i.equals("Water6")) {popUpManager.showPopUp("activityPopUp");}
+                    if(i.equals("Goodricke Hub")) {popUpManager.showPopUp("sleepingPopUp");}
                 }
             }
         }
