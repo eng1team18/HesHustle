@@ -259,14 +259,19 @@ public class Player {
         Rectangle downCollision = new Rectangle(player.x / scaley, player.y /scaley - 3,
                 player.getWidth() / scaley, 0);
 
+        collisionUp = false;
+        collisionLeft = false;
+        collisionDown = false;
+        collisionRight = false;
+
         for (MapObject building : buildingsAndBoundsObjects) {
             Rectangle collisionBox = ((RectangleMapObject) building).getRectangle();
             String popUpCurrent = "";
 
-            collisionUp = (upCollision).overlaps(collisionBox);
-            collisionLeft = (leftCollision).overlaps(collisionBox);
-            collisionRight = (rightCollision).overlaps(collisionBox);
-            collisionDown = (downCollision).overlaps(collisionBox);
+            if((upCollision).overlaps(collisionBox)) collisionUp = true;
+            if((leftCollision).overlaps(collisionBox)) collisionLeft = true;
+            if((rightCollision).overlaps(collisionBox)) collisionRight = true;
+            if((downCollision).overlaps(collisionBox)) collisionDown = true;
 
             if (playerHitBox.overlaps(collisionBox)) {
                 if (building.getName().equals("CS Building")) {
@@ -301,7 +306,6 @@ public class Player {
                     }
                 }
             }
-            if (collisionUp || collisionRight || collisionLeft || collisionDown) break;
         }
 
         // Allow character to move if no collision
