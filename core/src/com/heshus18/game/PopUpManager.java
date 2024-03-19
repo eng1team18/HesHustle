@@ -14,7 +14,7 @@ public class PopUpManager {
      * Initializes a new PopUpManager instance.
      */
     public PopUpManager() {
-        popUps = new HashMap<>();
+        popUps = new HashMap<String, PopUp>();
     }
 
     /**

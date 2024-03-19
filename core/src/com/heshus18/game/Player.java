@@ -163,16 +163,10 @@ public class Player {
         stateTime = 0;
     }
 
-    /**
-     * @return current player animation
-     */
     public int getCurrentAnimation() {
         return currentAnimation;
     }
 
-    /**
-     * @return player's x coordinate
-     */
     public float getX() {
         return player.getX();
     }
@@ -268,13 +262,13 @@ public class Player {
                 player.width / scaley + 16, player.height / scaley);
 
         for (MapObject building : buildingsAndBoundsObjects) {
-            Rectangle buildingBox = ((RectangleMapObject) building).getRectangle();
+            Rectangle collisionBox = ((RectangleMapObject) building).getRectangle();
             String popUpCurrent = "";
 
-            collisionX = (potentialPlayerXScaled).overlaps(buildingBox);
-            collisionY = (potentialPlayerYScaled).overlaps(buildingBox);
+            collisionX = (potentialPlayerXScaled).overlaps(collisionBox);
+            collisionY = (potentialPlayerYScaled).overlaps(collisionBox);
 
-            if (playerHitBox.overlaps(buildingBox)) {
+            if (playerHitBox.overlaps(collisionBox)) {
                 if (building.getName().equals("CS Building")) {
                     GameScreen.interact();
                     popUpCurrent = "studyPopUp";
@@ -295,6 +289,14 @@ public class Player {
                 }
                 if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
                     if (!popUpCurrent.isEmpty()) {
+
+                        if (this.getCurrentAnimation() == LEFTWALK)
+                            this.setCurrentAnimation(LEFTIDLE);
+                        else if (this.getCurrentAnimation() == RIGHTWALK)
+                            this.setCurrentAnimation(RIGHTIDLE);
+                        else if (this.getCurrentAnimation() == BACKWALK)
+                            this.setCurrentAnimation(BACKIDLE);
+
                         popUpManager.showPopUp(popUpCurrent);
                     }
                 }
