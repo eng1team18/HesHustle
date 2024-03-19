@@ -213,7 +213,7 @@ public class GameScreen implements Screen {
 
     public static void interact(){
         batch.begin();
-        font.draw(batch, "E to interact", 10, 32);
+        font.draw(batch, "E to interact", 450, 270);
         batch.end();
     }
 

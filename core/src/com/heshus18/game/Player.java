@@ -143,7 +143,7 @@ public class Player {
         player.height = 88;
 
         //Player variables
-        interactSize = 5;
+        interactSize = 20;
         speed = 300;
 
         //Collision variables
@@ -248,8 +248,8 @@ public class Player {
 
         //Create player hit boxes
         scaley = GameScreen.unitScale;
-        Rectangle playerHitBox = new Rectangle((player.x - interactSize) / 2, (player.y - interactSize) / 2,
-                player.width + interactSize, player.height + interactSize);
+        Rectangle playerHitBox = new Rectangle((player.x / scaley) - (interactSize / 2), (player.y / scaley) - (interactSize / 2),
+                player.width / scaley + interactSize, player.height /scaley + interactSize);
         Rectangle upCollision = new Rectangle(player.x / scaley, player.y / scaley + player.getHeight() /scaley + 3,
                 player.getWidth() /scaley, 0);
         Rectangle leftCollision = new Rectangle(player.x / scaley - 3, player.y /scaley, 0,
