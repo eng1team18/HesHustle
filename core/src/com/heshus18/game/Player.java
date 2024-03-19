@@ -45,11 +45,11 @@ public class Player {
     boolean leftMove, rightMove, upMove, downMove;
     //player hit box
     Rectangle player;
-    float interactSize;
+    float interactSize, speed;
 
 
     //Map variables
-    boolean collisionX, collisionY;
+    boolean collisionUp, collisionDown, collisionLeft, collisionRight;
     TiledMap map;
     MapLayer buildingsAndBounds;
     MapObjects buildingsAndBoundsObjects;
@@ -142,10 +142,15 @@ public class Player {
         player.width = 31;
         player.height = 88;
 
-        //Collision variables
+        //Player variables
         interactSize = 5;
-        collisionX = false;
-        collisionY = false;
+        speed = 300;
+
+        //Collision variables
+        collisionUp = false;
+        collisionDown = false;
+        collisionLeft = false;
+        collisionRight = false;
 
         //Building the map layers/objects
         map = GameScreen.background;
@@ -201,20 +206,12 @@ public class Player {
     }
 
     public void move(PopUpManager popUpManager) {
-        float deltaX = 200 * Gdx.graphics.getDeltaTime();
-        float deltaY = 200 * Gdx.graphics.getDeltaTime();
-
-        //an array representing potential [potentialX, potentialY]
-        float potentialX = player.x + (Gdx.input.isKeyPressed(Input.Keys.D) ? deltaX : 0) - (Gdx.input.isKeyPressed(Input.Keys.A) ? deltaX : 0);
-        float potentialY = player.y + (Gdx.input.isKeyPressed(Input.Keys.W) ? deltaY : 0) - (Gdx.input.isKeyPressed(Input.Keys.S) ? deltaY : 0);
-
-        //Performing character movement and changing current animation to reflect direction
+        //Get which direction the player is moving and set animation accordingly
         //Up move
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             if (this.getCurrentAnimation() != BACKWALK)
                 this.setCurrentAnimation(BACKWALK);
             upMove = true;
-            potentialY += deltaY;
         } else upMove = false;
         //Left move
         //If also moving up, don't overwrite up animation
@@ -222,7 +219,6 @@ public class Player {
             if (this.getCurrentAnimation() != LEFTWALK && !upMove)
                 this.setCurrentAnimation(LEFTWALK);
             leftMove = true;
-            potentialX -= deltaX;
         } else leftMove = false;
         //Right move
         //If also moving up, don't overwrite up animation
@@ -230,7 +226,6 @@ public class Player {
             if (this.getCurrentAnimation() != RIGHTWALK && !upMove)
                 this.setCurrentAnimation(RIGHTWALK);
             rightMove = true;
-            potentialX += deltaX;
         } else rightMove = false;
         //Down move
         //If current animation is leftWalk or rightWalk, use that animation, else switch to leftWalk
@@ -239,7 +234,6 @@ public class Player {
                     this.getCurrentAnimation() != RIGHTWALK)
                 this.setCurrentAnimation(LEFTWALK);
             downMove = true;
-            potentialY -= deltaY;
         } else downMove = false;
 
         //Set idle animations based off previous direction
@@ -256,17 +250,23 @@ public class Player {
         scaley = GameScreen.unitScale;
         Rectangle playerHitBox = new Rectangle((player.x - interactSize) / 2, (player.y - interactSize) / 2,
                 player.width + interactSize, player.height + interactSize);
-        Rectangle potentialPlayerXScaled = new Rectangle(potentialX / scaley, player.y / scaley - 8,
-                player.width / scaley, player.height / scaley + 16);
-        Rectangle potentialPlayerYScaled = new Rectangle(player.x / scaley - 8, potentialY / scaley,
-                player.width / scaley + 16, player.height / scaley);
+        Rectangle upCollision = new Rectangle(player.x / scaley, player.y / scaley + player.getHeight() /scaley + 3,
+                player.getWidth() /scaley, 0);
+        Rectangle leftCollision = new Rectangle(player.x / scaley - 3, player.y /scaley, 0,
+                player.getHeight() / scaley);
+        Rectangle rightCollision = new Rectangle(player.x / scaley + player.getWidth() / scaley + 3, player.y /scaley,
+                0, player.getHeight() / scaley);
+        Rectangle downCollision = new Rectangle(player.x / scaley, player.y /scaley - 3,
+                player.getWidth() / scaley, 0);
 
         for (MapObject building : buildingsAndBoundsObjects) {
             Rectangle collisionBox = ((RectangleMapObject) building).getRectangle();
             String popUpCurrent = "";
 
-            collisionX = (potentialPlayerXScaled).overlaps(collisionBox);
-            collisionY = (potentialPlayerYScaled).overlaps(collisionBox);
+            collisionUp = (upCollision).overlaps(collisionBox);
+            collisionLeft = (leftCollision).overlaps(collisionBox);
+            collisionRight = (rightCollision).overlaps(collisionBox);
+            collisionDown = (downCollision).overlaps(collisionBox);
 
             if (playerHitBox.overlaps(collisionBox)) {
                 if (building.getName().equals("CS Building")) {
@@ -301,11 +301,13 @@ public class Player {
                     }
                 }
             }
-            if (collisionX && collisionY) break;
+            if (collisionUp || collisionRight || collisionLeft || collisionDown) break;
         }
 
         // Allow character to move if no collision
-        if (!collisionX) player.x = potentialX;
-        if (!collisionY) player.y = potentialY;
+        if (rightMove && !collisionRight) player.x += Gdx.graphics.getDeltaTime() * speed;
+        if (upMove && !collisionUp) player.y += Gdx.graphics.getDeltaTime() * speed;
+        if (leftMove && !collisionLeft) player.x -= Gdx.graphics.getDeltaTime() * speed;
+        if (downMove && !collisionDown) player.y -= Gdx.graphics.getDeltaTime() * speed;
     }
 }
