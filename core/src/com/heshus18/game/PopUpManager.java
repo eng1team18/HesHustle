@@ -8,7 +8,7 @@ import java.util.Map;
  * Manages the pop-up messages within the game, including adding, showing, updating, and rendering pop-ups.
  */
 public class PopUpManager {
-    private Map<String, PopUp> popUps;
+    private final Map<String, PopUp> popUps;
 
     /**
      * Initializes a new PopUpManager instance.
@@ -96,6 +96,9 @@ public class PopUpManager {
         }
     }
 
+    /**
+     * Disposes all loaded assets from memory after closing the game.
+     */
     public void dispose() {
         for (PopUp popUp : popUps.values()) {
             popUp.dispose();

@@ -10,7 +10,7 @@ public class Score {
     private int timeStudy;
     private int timeActivity;
 
-    private static Score instance = new Score();
+    private static final Score instance = new Score();
 
     private Score() {}
 

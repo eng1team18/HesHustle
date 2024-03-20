@@ -11,12 +11,9 @@ import com.badlogic.gdx.math.Vector2;
  */
 public class EnergyBar {
     private float energy;
-    private final float maxEnergy;
-    private final float barWidth;
-    private final float barHeight;
+    private final float maxEnergy, barWidth, barHeight;
     private final Vector2 position;
-    private Texture backgroundTexture;
-    private Texture foregroundTexture;
+    private final Texture backgroundTexture,foregroundTexture;
 
     /**
      * Creates an EnergyBar instance with specified properties.
@@ -55,6 +52,7 @@ public class EnergyBar {
         float adjustedX = position.x + padding;
         float adjustedY = position.y + padding;
 
+        //Draw the energy bar texture to the screen
         batch.draw(foregroundTexture, adjustedX, adjustedY, adjustedWidth, adjustedHeight);
     }
 
@@ -100,6 +98,9 @@ public class EnergyBar {
         return energy;
     }
 
+    /**
+     * Disposes all loaded assets from memory after closing the game.
+     */
     public void dispose() {
         backgroundTexture.dispose();
         foregroundTexture.dispose();

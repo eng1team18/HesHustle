@@ -21,18 +21,12 @@ public class PopUp {
     private String id;
     private boolean isVisible;
     private String message;
-    private Texture backgroundTexture;
-    private Rectangle bounds;
-    private Texture confirmButtonTexture;
-    private Rectangle confirmButtonBounds;
-    private Texture declineButtonTexture;
-    private Rectangle declineButtonBounds;
-    private Texture doneButtonTexture;
-    private Rectangle doneButtonBounds;
-    private BitmapFont font;
-    private List<Runnable> confirmActions;
-    private OrthographicCamera camera;
-    private String type;
+    private final Texture backgroundTexture, confirmButtonTexture, declineButtonTexture, doneButtonTexture;
+    private final Rectangle bounds, confirmButtonBounds, declineButtonBounds, doneButtonBounds;
+    private final BitmapFont font;
+    private final List<Runnable> confirmActions;
+    private final OrthographicCamera camera;
+    private final String type;
     private long showTime;
     private static final long popUpDuration = 2000;
 
@@ -170,6 +164,9 @@ public class PopUp {
         this.message = message;
     }
 
+    /**
+     * Disposes all loaded assets from memory after closing the game.
+     */
     public void dispose() {
         backgroundTexture.dispose();
         confirmButtonTexture.dispose();

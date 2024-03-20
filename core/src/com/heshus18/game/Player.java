@@ -17,7 +17,9 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
 /**
- * Represents the player in the game, animating and drawing the player sprite depending on current action
+ * Represents the player in the game, animating and drawing the player sprite depending on current action.
+ * Creates array of map objects, and detects player collision with each
+ * Detects player interactions with interactive map objects
  */
 
 public class Player {
@@ -28,12 +30,7 @@ public class Player {
     private float stateTime;
 
     //Animation classes for each animation
-    Animation leftIdle;
-    Animation<TextureRegion> rightIdle;
-    Animation<TextureRegion> backIdle;
-    Animation<TextureRegion> leftWalk;
-    Animation<TextureRegion> rightWalk;
-    Animation<TextureRegion> backWalk;
+    Animation<TextureRegion> leftIdle, rightIdle, backIdle, leftWalk, rightWalk, backWalk;
 
     //Array containing all frames of each animation
     TextureRegion[] leftIdleFrames, rightIdleFrames, backIdleFrames, leftWalkFrames, rightWalkFrames, backWalkFrames;
@@ -59,7 +56,7 @@ public class Player {
     /**
      * Creates an instance of player.
      * Creates all animations for player - 3 idle and 3 walk based on direction.
-     *
+     * Imports map and creates array of map objects
      * @param spriteSheet The sheet with all player animations
      */
     public Player(Texture spriteSheet) {
@@ -196,15 +193,24 @@ public class Player {
      * @param playerY the player's y coordinate
      */
     public void update(SpriteBatch batch, float playerX, float playerY) {
+        //Time since last animation frame
         stateTime += Gdx.graphics.getDeltaTime();
 
+        //Receive current animation frame from animation
         currentFrame = (TextureRegion) animations[currentAnimation].getKeyFrame(stateTime, true);
 
+        //Draw current animation frame
         batch.begin();
         batch.draw(currentFrame, playerX - 47, playerY, 128, 128);
         batch.end();
     }
 
+    /**
+     * Allows the player to move around the map
+     * Detects collision with map objects and does not allow player to pass through these.
+     * Detects interactive map objects and allows player to interact with them.
+     * @param popUpManager The instance of popUpManager being used in the game.
+     */
     public void move(PopUpManager popUpManager) {
         //Get which direction the player is moving and set animation accordingly
         //Up move
@@ -246,7 +252,9 @@ public class Player {
                 this.setCurrentAnimation(BACKIDLE);
         }
 
-        //Create player hit boxes
+        //Create player interact box that is interactSize larger than the player
+        //Create 4 1 dimensional player collision boxes on each side of the player with a small gap between them to
+        //avoid overlap.
         scaley = GameScreen.unitScale;
         Rectangle playerHitBox = new Rectangle((player.x / scaley) - (interactSize / 2), (player.y / scaley) - (interactSize / 2),
                 player.width / scaley + interactSize, player.height /scaley + interactSize);
@@ -259,20 +267,26 @@ public class Player {
         Rectangle downCollision = new Rectangle(player.x / scaley, player.y /scaley - 3,
                 player.getWidth() / scaley, 0);
 
+        //Set collision to false
         collisionUp = false;
         collisionLeft = false;
         collisionDown = false;
         collisionRight = false;
 
+        //Iterate through array of map objects
         for (MapObject building : buildingsAndBoundsObjects) {
+            //Create collision rectangle for current object
             Rectangle collisionBox = ((RectangleMapObject) building).getRectangle();
             String popUpCurrent = "";
 
+            //Detect if player collision boxes overlap current map object, and set corresponding flags.
             if((upCollision).overlaps(collisionBox)) collisionUp = true;
             if((leftCollision).overlaps(collisionBox)) collisionLeft = true;
             if((rightCollision).overlaps(collisionBox)) collisionRight = true;
             if((downCollision).overlaps(collisionBox)) collisionDown = true;
 
+            //Check if player interact box overlaps interactive buildings, show interact prompt,
+            // and set popUpCurrent accordingly
             if (playerHitBox.overlaps(collisionBox)) {
                 if (building.getName().equals("CS Building")) {
                     GameScreen.interact();
@@ -292,9 +306,10 @@ public class Player {
                     GameScreen.interact();
                     popUpCurrent = "sleepingPopUp";
                 }
+                //Allow player to interact with object using E key and show corresponding pop-up
                 if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
                     if (!popUpCurrent.isEmpty()) {
-
+                        //Set animation to idle if player chooses to interact
                         if (this.getCurrentAnimation() == LEFTWALK)
                             this.setCurrentAnimation(LEFTIDLE);
                         else if (this.getCurrentAnimation() == RIGHTWALK)
@@ -308,7 +323,7 @@ public class Player {
             }
         }
 
-        // Allow character to move if no collision
+        //Allow character to move if no collision in corresponding directions
         if (rightMove && !collisionRight) player.x += Gdx.graphics.getDeltaTime() * speed;
         if (upMove && !collisionUp) player.y += Gdx.graphics.getDeltaTime() * speed;
         if (leftMove && !collisionLeft) player.x -= Gdx.graphics.getDeltaTime() * speed;
