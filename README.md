@@ -43,3 +43,23 @@ studyPopUp.addConfirmAction(new Runnable() {
 ```
 
 The following code snippet does the following: it first adds the Confirm action to the Confirm button. It then checks if the player's energy has been drained; if they have, the score gets incremented, and an info PopUp is shown. Otherwise, a warning PopUp is shown instead.
+
+### Map & Assets
+
+**Assets:**
+All the game's pixellated graphics were created using the website Pixilart https://www.pixilart.com/.
+If you want to alter the game's graphics, under assets we left an Art folder containing the .pixil files for each of the game's sprites & sprite sheets. These can be imported into Pixilart so you can make any changes.
+
+**Map:**
+Our map was implemented using a LibGDX tilemap, more information on these can be found here: https://libgdx.com/wiki/graphics/2d/tile-maps
+
+This allows you to use an application called Tiled (https://www.mapeditor.org/) to create and edit the visuals of the map.
+
+Tiled also allows you to add objects, which can be used to draw hitboxes onto the map, rather than manually programming them in code. Currently, only rectangular collisions are implemented, adding any rectangular object to Object Layer 1 will automatically mean the player can't walk through that rectangle.
+
+Our tilemap is currently set up with the following layers:
+- **Object Layer 1**: Contains all of the game's objects, this includes all buildings, NPCs and trees, these cause collisions. Some mismatch their object shape intentionally to prevent the player from leaving the intended part of the map.
+- **NPC Layer**: Contains the animated NPC sprites on the map, may be deleted if assessment 2 requires implementing moving/interactable NPCs.
+- **Tree Layer 2**: Contains some of the tree sprites, this extra layer allowed us to have overlapping trees
+- **Tree Layer 1**: Contains most of the tree sprites
+- **Floor+Building Layer**: Contains all the floor and building tiles
