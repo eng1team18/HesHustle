@@ -73,7 +73,7 @@ public class GameOverScreen implements Screen {
         batch.begin();
         font.draw(batch, "GAME OVER", 300, 400);
         String scoresText = String.format(
-                "Time Ate: %d\nTime Slept: %d\nTime Study: %d\nTime Activity: %d",
+                "Times Eaten: %d\nTimes Slept: %d\nTimes Studied: %d\nTimes Activities: %d",
                 score.getTimeAte(), score.getTimeSlept(), score.getTimeStudy(), score.getTimeActivity());
         font.draw(batch, scoresText, 300, 350);
 
