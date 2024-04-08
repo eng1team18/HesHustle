@@ -328,5 +328,18 @@ public class Player {
         if (upMove && !collisionUp) player.y += Gdx.graphics.getDeltaTime() * speed;
         if (leftMove && !collisionLeft) player.x -= Gdx.graphics.getDeltaTime() * speed;
         if (downMove && !collisionDown) player.y -= Gdx.graphics.getDeltaTime() * speed;
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F)) {
+            popUpManager.showPopUp("studyPopUp");
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.G)) {
+            popUpManager.showPopUp("eatingPopUp");
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
+            popUpManager.showPopUp("activityPopUp");
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.J)) {
+            popUpManager.showPopUp("sleepingPopUp");
+        }
     }
 }

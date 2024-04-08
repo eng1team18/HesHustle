@@ -158,6 +158,11 @@ public class GameScreen implements Screen {
                         game.setScreen(new GameOverScreen(game));
                     } else {
                         gameTime.nextDay();
+                        gameTime.nextDay();
+                        gameTime.nextDay();
+                        gameTime.nextDay();
+                        gameTime.nextDay();
+                        gameTime.nextDay();
                         score.incrementTimeSlept();
                         if (currentHour >= 18 && currentHour <= 22) {
                             energyBar.addEnergy(100f);
